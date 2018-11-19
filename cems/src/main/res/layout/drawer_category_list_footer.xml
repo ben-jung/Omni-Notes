@@ -36,7 +36,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:padding="4dp"
-        android:src="@drawable/ic_settings_black_36dp" />
+        android:src="@drawable/ic_information_outline_grey600_24dp" />
 
 <!--     <com.neopixl.pixlui.components.textview.TextView -->
 <!--         android:id="@+id/settings" -->
@@ -57,7 +57,7 @@
         android:layout_height="50dp"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/icon_text_margin"
-        android:text="@string/settings"
+        android:text="Collection Guide"
         android:textAllCaps="true"
         android:textAppearance="@style/Text.Normal"
         android:textColor="@color/drawer_text"

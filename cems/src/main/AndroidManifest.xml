@@ -133,7 +133,7 @@
         <!-- Settings -->
         <activity
             android:name="it.feio.android.omninotes.SettingsActivity"
-            android:label="@string/settings"
+            android:label="Collection Guide"
             android:parentActivityName="it.feio.android.omninotes.MainActivity"
             android:theme="@style/PreferencesTheme">
             <meta-data

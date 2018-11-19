@@ -126,7 +126,7 @@
     <string name="no_categories_created">No categories have been created yet</string>
     <string name="notes_category_removed">Category removed from notes</string>
     <string name="notes_categorized_as">Notes categorized as</string>
-    <string name="insert_security_password">Insert password</string>
+    <string name="insert_security_password">Insert security code</string>
     <string name="lock">Lock</string>
     <string name="save_note_to_lock_it">Save note to lock it</string>
     <string name="save_note_to_unlock_it">Save note to unlock it</string>

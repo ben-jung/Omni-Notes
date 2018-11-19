@@ -119,6 +119,14 @@ public class MainActivity extends BaseActivity implements OnDateSetListener, OnT
 	 * This method starts the bootstrap chain.
 	 */
 	private void checkPassword() {
+        PasswordHelper.requestPassword(this, passwordConfirmed -> {
+            if (passwordConfirmed) {
+                init();
+            } else {
+                finish();
+            }
+        });
+        /*
 		if (prefs.getString(Constants.PREF_PASSWORD, null) != null
 				&& prefs.getBoolean("settings_password_access", false)) {
             PasswordHelper.requestPassword(this, passwordConfirmed -> {
@@ -130,7 +138,7 @@ public class MainActivity extends BaseActivity implements OnDateSetListener, OnT
 			});
         } else {
             init();
-		}
+		}*/
 	}
 
 

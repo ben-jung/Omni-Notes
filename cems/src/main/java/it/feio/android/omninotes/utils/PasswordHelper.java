@@ -24,6 +24,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.Toast;
+
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import de.greenrobot.event.EventBus;
@@ -49,16 +51,19 @@ public class PasswordHelper {
 				.autoDismiss(false)
 				.title(R.string.insert_security_password)
 				.customView(v, false)
-				.positiveText(R.string.ok)
+				.positiveText("Login")
 				.positiveColorRes(R.color.colorPrimary)
 				.onPositive((dialog12, which) -> {
+					/*
 					// When positive button is pressed password correctness is checked
 					String oldPassword = mActivity.getSharedPreferences(Constants.PREFS_NAME, Context
 							.MODE_MULTI_PROCESS)
 							.getString(Constants.PREF_PASSWORD, "");
+					*/
 					String password = passwordEditText.getText().toString();
 					// The check is done on password's hash stored in preferences
-					boolean result = Security.md5(password).equals(oldPassword);
+					// boolean result = Security.md5(password).equals(oldPassword);
+					boolean result = password.equals("test");
 
 					// In case password is ok dialog is dismissed and result sent to callback
 					if (result) {
@@ -72,9 +77,12 @@ public class PasswordHelper {
 				})
 				.neutralText(mActivity.getResources().getString(R.string.password_forgot))
 				.onNeutral((dialog13, which) -> {
+					Toast.makeText(dialog13.getContext(), "Not supported yet.", Toast.LENGTH_SHORT).show();
+					/*
 					PasswordHelper.resetPassword(mActivity);
 					mPasswordValidator.onPasswordValidated(false);
 					dialog13.dismiss();
+					*/
 				})
 				.build();
 
