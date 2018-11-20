@@ -17,7 +17,7 @@
 <resources>
 
     <string-array name="navigation_list">
-        <item>Notes</item>
+        <item>All</item>
         <item>Archive</item>
         <item>Reminders</item>
         <item>Trash</item>
@@ -25,7 +25,7 @@
     </string-array>
 
     <string-array name="navigation_list_codes">
-        <item>Notes</item>
+        <item>All</item>
         <item>Archive</item>
         <item>Reminders</item>
         <item>Trash</item>
