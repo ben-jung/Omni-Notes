@@ -17,61 +17,35 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   android:fitsSystemWindows="true">
 
-    <PreferenceCategory android:title="@string/settings_category_preferences">
+    <PreferenceCategory android:title="Categories">
 
         <PreferenceScreen
                 android:key="settings_data"
-                android:title="@string/settings_screen_data"/>
+                android:title="CA Chamber"/>
 
         <PreferenceScreen
                 android:key="settings_interface"
-                android:title="@string/settings_screen_interface"/>
+                android:title="디지털 비디오 카메라 (CCTV)"/>
 
         <PreferenceScreen
                 android:key="settings_navigation"
-                android:title="@string/settings_screen_navigation"/>
+                android:title="멸균면봉"/>
 
         <PreferenceScreen
                 android:key="settings_behaviors"
-                android:title="@string/settings_screen_behaviors"/>
+                android:title="법광원 (Forensic Light Source)"/>
 
         <PreferenceScreen
                 android:key="settings_notifications"
-                android:title="@string/settings_screen_notifications"/>
+                android:title="분말법, 지문현출용액"/>
 
         <PreferenceScreen
                 android:key="settings_privacy"
-                android:title="@string/settings_screen_privacy"/>
+                android:title="정전기 족적 채취"/>
 
-    </PreferenceCategory>
-
-
-    <PreferenceCategory android:title="@string/settings_category_beta">
-        <Preference
-                android:key="settings_beta"
-                android:summary="@string/settings_beta_summary"
-                android:title="@string/settings_beta">
-            <intent
-                    android:action="android.intent.action.VIEW"
-                    android:data="@string/beta_link"/>
-        </Preference>
-    </PreferenceCategory>
-
-
-    <PreferenceCategory android:title="@string/help">
-
-        <Preference
-                android:key="settings_online_manual"
-                android:title="@string/online_manual">
-            <intent
-                    android:action="android.intent.action.VIEW"
-                    android:data="@string/help_online_url"/>
-        </Preference>
-
-        <Preference
-                android:key="settings_tour_show_again"
-                android:title="@string/settings_tour_show_again"
-                android:summary="@string/settings_tour_show_again_summary"/>
+        <PreferenceScreen
+            android:key="settings_microscope"
+            android:title="현미경"/>
 
     </PreferenceCategory>
 

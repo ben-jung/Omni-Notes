@@ -49,6 +49,7 @@ import it.feio.android.omninotes.helpers.PermissionsHelper;
 import it.feio.android.omninotes.models.ONStyle;
 import it.feio.android.omninotes.utils.*;
 import org.apache.commons.lang.StringUtils;
+import com.epson.epos2.printer.Printer;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -412,6 +413,31 @@ public class SettingsFragment extends PreferenceFragment {
 			} catch (NameNotFoundException e) {
 				Log.e(Constants.TAG, "Error retrieving version", e);
 			}
+		}
+
+		// Changelog
+		Preference microscope = findPreference("settings_microscope");
+		if (microscope != null) {
+			microscope.setOnPreferenceClickListener(arg0 -> {
+
+				/* ((OmniNotes)getActivity().getApplication()).getAnalyticsHelper().trackEvent(AnalyticsHelper.CATEGORIES.SETTING, "settings_microscope");
+
+				new MaterialDialog.Builder(activity)
+						.customView(R.layout.activity_changelog, false)
+						.positiveText(R.string.ok)
+						.build().show();
+				return false;
+
+				String targetPrinterAddr = "BT:00:01:90:AE:B9:D8";
+				try {
+					mPrinter.connect(targetPrinterAddr, Printer.PARAM_DEFAULT);
+				}
+				catch (Exception e) {
+					ShowMsg.showException(e, "connect", mContext);
+					return false;
+				}*/
+				return false;
+			});
 		}
 
 
