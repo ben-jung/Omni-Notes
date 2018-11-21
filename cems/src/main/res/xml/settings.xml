@@ -19,54 +19,33 @@
 
     <PreferenceCategory android:title="Categories">
 
-        <PreferenceScreen
-                android:key="settings_data"
+        <Preference
+                android:key="settings_ca_chamber"
                 android:title="CA Chamber"/>
 
-        <PreferenceScreen
-                android:key="settings_interface"
+        <Preference
+                android:key="settings_digital_camera"
                 android:title="디지털 비디오 카메라 (CCTV)"/>
 
-        <PreferenceScreen
-                android:key="settings_navigation"
+        <Preference
+                android:key="settings_cotton_bud"
                 android:title="멸균면봉"/>
 
-        <PreferenceScreen
-                android:key="settings_behaviors"
+        <Preference
+                android:key="settings_forensic_light"
                 android:title="법광원 (Forensic Light Source)"/>
 
-        <PreferenceScreen
-                android:key="settings_notifications"
+        <Preference
+                android:key="settings_fingerprint"
                 android:title="분말법, 지문현출용액"/>
 
-        <PreferenceScreen
-                android:key="settings_privacy"
+        <Preference
+                android:key="settings_footprint"
                 android:title="정전기 족적 채취"/>
 
-        <PreferenceScreen
-            android:key="settings_microscope"
-            android:title="현미경"/>
-
-    </PreferenceCategory>
-
-
-    <PreferenceCategory android:title="@string/settings_category_about">
-
         <Preference
-                android:key="settings_changelog"
-                android:title="@string/settings_changelog"/>
-
-        <Preference
-                android:title="@string/settings_statistics">
-            <intent android:targetPackage="@string/app_package"
-                    android:targetClass="it.feio.android.omninotes.StatsActivity"/>
-        </Preference>
-
-        <Preference
-                android:title="@string/settings_about">
-            <intent android:targetPackage="@string/app_package"
-                    android:targetClass="it.feio.android.omninotes.AboutActivity"/>
-        </Preference>
+                android:key="settings_microscope"
+                android:title="현미경"/>
 
     </PreferenceCategory>
 

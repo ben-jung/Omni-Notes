@@ -235,17 +235,6 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
                 case R.id.fab_note:
                     editNote(new Note(), v);
                     break;
-                case R.id.fab_camera:
-                    Intent i = mainActivity.getIntent();
-                    i.setAction(Constants.ACTION_FAB_TAKE_PHOTO);
-                    mainActivity.setIntent(i);
-                    editNote(new Note(), v);
-                    break;
-                case R.id.fab_checklist:
-                    Note note = new Note();
-                    note.setChecklist(true);
-                    editNote(note, v);
-                    break;
             }
         });
     }

@@ -395,47 +395,96 @@ public class SettingsFragment extends PreferenceFragment {
 		}
 
 
-		// Changelog
-		Preference changelog = findPreference("settings_changelog");
-		if (changelog != null) {
-			changelog.setOnPreferenceClickListener(arg0 -> {
+		Preference cg1 = findPreference("settings_ca_chamber");
+		if (cg1 != null) {
+			cg1.setOnPreferenceClickListener(arg0 -> {
 
-				((OmniNotes)getActivity().getApplication()).getAnalyticsHelper().trackEvent(AnalyticsHelper.CATEGORIES.SETTING, "settings_changelog");
-
-				new MaterialDialog.Builder(activity)
-						.customView(R.layout.activity_changelog, false)
+				new MaterialDialog.Builder(getContext())
+						.title("CA Chamber")
+						.content("가스지문 현출기이며 지문현출에 필요한 가성소다 및 접착제 가스를 사용하는 방법이다.\n" +
+								"가로세로 60cm 남짓한 밀폐된 chamber는 감식요원들이 유해가스를 마실 위험이 없고, 짧은 시간 안에 지문이 현출되는 장점이 있다.")
 						.positiveText(R.string.ok)
 						.build().show();
 				return false;
 			});
-			try {
-				changelog.setSummary(AppVersionHelper.getCurrentAppVersionName(getActivity()));
-			} catch (NameNotFoundException e) {
-				Log.e(Constants.TAG, "Error retrieving version", e);
-			}
 		}
+		Preference cg2 = findPreference("settings_digital_camera");
+		if (cg2 != null) {
+			cg2.setOnPreferenceClickListener(arg0 -> {
 
-		// Changelog
-		Preference microscope = findPreference("settings_microscope");
-		if (microscope != null) {
-			microscope.setOnPreferenceClickListener(arg0 -> {
-
-				/* ((OmniNotes)getActivity().getApplication()).getAnalyticsHelper().trackEvent(AnalyticsHelper.CATEGORIES.SETTING, "settings_microscope");
-
-				new MaterialDialog.Builder(activity)
-						.customView(R.layout.activity_changelog, false)
+				new MaterialDialog.Builder(getContext())
+						.title("디지털 비디오 카메라 (CCTV)")
+						.content("증거물의 외형을 사진/영상으로 찍는다. 더 나아가 범죄현장에 설치된 CCTV는 아주 중요한 증거가 된다.")
 						.positiveText(R.string.ok)
 						.build().show();
 				return false;
+			});
+		}
+		Preference cg3 = findPreference("settings_cotton_bud");
+		if (cg3 != null) {
+			cg3.setOnPreferenceClickListener(arg0 -> {
 
-				String targetPrinterAddr = "BT:00:01:90:AE:B9:D8";
-				try {
-					mPrinter.connect(targetPrinterAddr, Printer.PARAM_DEFAULT);
-				}
-				catch (Exception e) {
-					ShowMsg.showException(e, "connect", mContext);
-					return false;
-				}*/
+				new MaterialDialog.Builder(getContext())
+						.title("멸균면봉")
+						.content("주로 적은 양의 유체를 증거물로써 채집할 때 쓰인다. 성폭력 사건에서의 적은양의 타액, 정액, 혈흔 등과 더불어 주변 환경에서 증거를 채집할 때 쓰인다.")
+						.positiveText(R.string.ok)
+						.build().show();
+				return false;
+			});
+		}
+		Preference cg4 = findPreference("settings_forensic_light");
+		if (cg4 != null) {
+			cg4.setOnPreferenceClickListener(arg0 -> {
+
+				new MaterialDialog.Builder(getContext())
+						.title("법광원 (Forensic Light Source)")
+						.content("감식용 LED 조명이다. 과학수사 활동에 사용되는 플래시 광원을 일반적으로 푸른색 법광원을 사용한다. 형광 반응에 간섭하지 않도록 목표 파장보다\n" +
+								"장파장 대역을 차단한 경우가 일반적인 빛이다.\n" +
+								"이를 통해 소변, 정액, 혈흔 등을 보다 넓은 범위에서 확인할 수 있다.\n" +
+								"기술의 발달로, 파장대별로 셋팅이 가능함은 물론 밝기조절 등을 할 수 있는 휴대용 가변광원장비도 사용되고있다.")
+						.positiveText(R.string.ok)
+						.build().show();
+				return false;
+			});
+		}
+		Preference cg5 = findPreference("settings_fingerprint");
+		if (cg5 != null) {
+			cg5.setOnPreferenceClickListener(arg0 -> {
+
+				new MaterialDialog.Builder(getContext())
+						.title("분말법, 지문현출용액")
+						.content("분말법은 고체법이라고도 불린다. 지문이 인상되었다고 생각되는 물체나 부분에 미세한 분말을 도포하여 잠재적 지문을 검출하는 방법이다. \n" +
+								"주로 표면이 편평하고 매끄로우며 경질의 물체상에 유류된 잠재지문을 채취하는데 적당하다.\n" +
+								"화장품 가루 기술을 적용하여 보다 편리한 S분말 등이 사용된다.\n" +
+								"지문현출용액을 사용하는 방법은 액체법이라고도 불린다. 증거물의 염분이나 단백질 등에 화학적 반응을 일으켜서 지문을 검출하는 방법으로, \n" +
+								"닌히드린 용액법과 초산은 용액법 등이 있다. 주로 지류에서 지문을 검출하는 경우에 사용한다.")
+						.positiveText(R.string.ok)
+						.build().show();
+				return false;
+			});
+		}
+		Preference cg6 = findPreference("settings_footprint");
+		if (cg6 != null) {
+			cg6.setOnPreferenceClickListener(arg0 -> {
+
+				new MaterialDialog.Builder(getContext())
+						.title("정전기 족적 채취")
+						.content("사진 및 육안으로 확인이 안되는 족적을 채취하는데에 쓰인다. 이불이나 의류 등에 남겨진 족적을 정전기의 원리를 이용하여 채집하는 방법이다. \n" +
+								"센 전압을 가해주어 정전기를 일으켜 금속판에 족적의 무늬가 그대로 달라붙는 휴대용 감식 장비이다.")
+						.positiveText(R.string.ok)
+						.build().show();
+				return false;
+			});
+		}
+		Preference cg7 = findPreference("settings_microscope");
+		if (cg7 != null) {
+			cg7.setOnPreferenceClickListener(arg0 -> {
+
+				new MaterialDialog.Builder(getContext())
+						.title("현미경")
+						.content("증거물 채집 후, 육안으로 보이지 않는 물질을 세밀하게 분석할 때 사용된다. 현미경의 분해능에 따라 증거물이 확대되어 보인다.")
+						.positiveText(R.string.ok)
+						.build().show();
 				return false;
 			});
 		}
