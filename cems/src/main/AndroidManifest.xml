@@ -123,7 +123,7 @@
 
         <activity
             android:name="it.feio.android.omninotes.CategoryActivity"
-            android:label="@string/title_activity_category"
+            android:label="Edit crime case"
             android:parentActivityName="it.feio.android.omninotes.MainActivity"
             android:theme="@style/Theme.AppCompat.Light.Dialog">
             <meta-data

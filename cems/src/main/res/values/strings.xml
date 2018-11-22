@@ -117,7 +117,7 @@
     <string name="delete_this_category">Delete this category</string>
     <string name="category">Category</string>
     <string name="categorize_as">Categorize as</string>
-    <string name="title_activity_category">Edit category</string>
+    <string name="title_activity_category">Edit crime case</string>
     <string name="delete_unused_category_confirmation">Confirm deletion?</string>
     <string name="delete_category_confirmation">This case is used by some evidence.\nConfirm evidences un-categorization and case deletion?</string>
     <string name="discard">Discard</string>

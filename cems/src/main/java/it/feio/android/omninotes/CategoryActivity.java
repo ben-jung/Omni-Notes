@@ -46,6 +46,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import it.feio.android.omninotes.async.bus.CategoriesUpdatedEvent;
+import it.feio.android.omninotes.async.bus.NavigationUpdatedEvent;
 import it.feio.android.omninotes.db.DbHelper;
 import it.feio.android.omninotes.models.Category;
 import it.feio.android.omninotes.utils.Constants;
@@ -150,6 +151,17 @@ public class CategoryActivity extends AppCompatActivity implements ColorChooserD
 
         EventBus.getDefault().post(new CategoriesUpdatedEvent());
         BaseActivity.notifyAppWidgets(OmniNotes.getAppContext());
+
+        /*
+        if (mainActivity.updateNavigation(String.valueOf((id)))) {
+            mDrawerCategoriesList.setItemChecked(position, true);
+            // Forces redraw
+            if (mDrawerList != null) {
+                mDrawerList.setItemChecked(0, false);
+                EventBus.getDefault().post(new NavigationUpdatedEvent(mDrawerCategoriesList.getItemAtPosition
+                        (position)));
+            }
+        }*/
 
         setResult(RESULT_FIRST_USER);
 
