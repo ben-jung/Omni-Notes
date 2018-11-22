@@ -106,7 +106,7 @@
     <string name="add_tag">Add tags</string>
     <string name="select_tags">Select tag(s)</string>
     <string name="categories">Categories</string>
-    <string name="edit_tag">Edit category</string>
+    <string name="edit_tag">Crime Case</string>
     <string name="add_category">Add category</string>
     <string name="category_title">Title</string>
     <string name="category_description">Description</string>
@@ -118,8 +118,8 @@
     <string name="category">Category</string>
     <string name="categorize_as">Categorize as</string>
     <string name="title_activity_category">Edit category</string>
-    <string name="delete_unused_category_confirmation">Confirm category deletion?</string>
-    <string name="delete_category_confirmation">This category is used by some notes.\nConfirm notes un-categorization and category deletion?</string>
+    <string name="delete_unused_category_confirmation">Confirm deletion?</string>
+    <string name="delete_category_confirmation">This case is used by some evidence.\nConfirm evidences un-categorization and case deletion?</string>
     <string name="discard">Discard</string>
     <string name="remove_category">Remove category</string>
     <string name="no_tags_created">No tags available yet\nCreate them by writing hashtags into your notes</string>

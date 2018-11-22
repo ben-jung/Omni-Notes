@@ -147,6 +147,12 @@ public class CategoryActivity extends AppCompatActivity implements ColorChooserD
         // Sets result to show proper message
         getIntent().putExtra(Constants.INTENT_CATEGORY, category);
         setResult(RESULT_OK, getIntent());
+
+        EventBus.getDefault().post(new CategoriesUpdatedEvent());
+        BaseActivity.notifyAppWidgets(OmniNotes.getAppContext());
+
+        setResult(RESULT_FIRST_USER);
+
         finish();
     }
 

@@ -98,6 +98,7 @@ import it.feio.android.pixlui.links.UrlCompleter;
 import it.feio.android.simplegallery.util.BitmapUtils;
 
 import static android.support.v4.view.ViewCompat.animate;
+import static it.feio.android.omninotes.utils.Navigation.CATEGORY;
 
 
 public class ListFragment extends BaseFragment implements OnViewTouchedListener, UndoBarController.UndoListener {
@@ -234,6 +235,11 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
                     break;
                 case R.id.fab_note:
                     editNote(new Note(), v);
+                    break;
+                case R.id.fab_checklist:
+                    Intent intent = new Intent(mainActivity, CategoryActivity.class);
+                    intent.putExtra("noHome", true);
+                    startActivityForResult(intent, CATEGORY);
                     break;
             }
         });
@@ -558,9 +564,9 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
         Menu menu = getActionMode().getMenu();
         int navigation = Navigation.getNavigation();
         boolean showArchive = navigation == Navigation.NOTES || navigation == Navigation.REMINDERS || navigation ==
-                Navigation.UNCATEGORIZED || navigation == Navigation.CATEGORY;
+                Navigation.UNCATEGORIZED || navigation == CATEGORY;
         boolean showUnarchive = navigation == Navigation.ARCHIVE || navigation == Navigation.UNCATEGORIZED ||
-                navigation == Navigation.CATEGORY;
+                navigation == CATEGORY;
 
         if (navigation == Navigation.TRASH) {
             menu.findItem(R.id.menu_untrash).setVisible(true);
@@ -690,7 +696,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
 		boolean navigationReminders = navigation == Navigation.REMINDERS;
 		boolean navigationArchive = navigation == Navigation.ARCHIVE;
 		boolean navigationTrash = navigation == Navigation.TRASH;
-		boolean navigationCategory = navigation == Navigation.CATEGORY;
+		boolean navigationCategory = navigation == CATEGORY;
 
 		boolean filterPastReminders = prefs.getBoolean(Constants.PREF_FILTER_PAST_REMINDERS, true);
 		boolean filterArchivedInCategory = navigationCategory && prefs.getBoolean(Constants
@@ -869,7 +875,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
             Log.d(Constants.TAG, "Adding new note");
             // if navigation is a category it will be set into note
             try {
-                if (Navigation.checkNavigation(Navigation.CATEGORY) || !TextUtils.isEmpty(mainActivity.navigationTmp)) {
+                if (Navigation.checkNavigation(CATEGORY) || !TextUtils.isEmpty(mainActivity.navigationTmp)) {
 					String categoryId = (String) ObjectUtils.defaultIfNull(mainActivity.navigationTmp,
 							Navigation.getCategory().toString());
 					note.setCategory(DbHelper.getInstance().getCategory(Long.parseLong(categoryId)));
@@ -1143,7 +1149,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
                         trashNotes(false);
                     }
                     // ...removes category
-                    else if (Navigation.checkNavigation(Navigation.CATEGORY)) {
+                    else if (Navigation.checkNavigation(CATEGORY)) {
                         categorizeNotesExecute(null);
                     } else {
                         // ...trash
@@ -1340,7 +1346,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
             // If actual navigation is not "Notes" the item will not be removed but replaced to fit the new state
             if (Navigation.checkNavigation(Navigation.NOTES)
 					|| (Navigation.checkNavigation(Navigation.ARCHIVE) && !archive)
-					|| (Navigation.checkNavigation(Navigation.CATEGORY) && prefs.getBoolean(Constants
+					|| (Navigation.checkNavigation(CATEGORY) && prefs.getBoolean(Constants
 					.PREF_FILTER_ARCHIVED_IN_CATEGORIES + Navigation.getCategory(), false))) {
 				listAdapter.remove(note);
             } else {
@@ -1383,7 +1389,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
 
     private void archiveNote(List<Note> notes, boolean archive) {
         new NoteProcessorArchive(notes, archive).process();
-        if (!Navigation.checkNavigation(Navigation.CATEGORY)) {
+        if (!Navigation.checkNavigation(CATEGORY)) {
             listAdapter.remove(notes);
         }
         Log.d(Constants.TAG, "Notes" + (archive ? "archived" : "restored from archive"));
@@ -1456,7 +1462,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
             }
             // Update adapter content if actual navigation is the category
             // associated with actually cycled note
-            if ((Navigation.checkNavigation(Navigation.CATEGORY) && !Navigation.checkNavigationCategory(category)) ||
+            if ((Navigation.checkNavigation(CATEGORY) && !Navigation.checkNavigationCategory(category)) ||
                     Navigation.checkNavigation(Navigation.UNCATEGORIZED)) {
                 listAdapter.remove(note);
             } else {
