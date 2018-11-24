@@ -1,4 +1,4 @@
-package com.epson.epos2_printer;
+package it.feio.android.omninotes.printer;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -12,10 +12,8 @@ public class ShowMsg {
         String msg = "";
         if (e instanceof Epos2Exception) {
             msg = String.format(
-                      "%s\n\t%s\n%s\n\t%s",
-                      context.getString(R.string.title_err_code),
+                      "%s\n%s",
                       getEposExceptionText(((Epos2Exception) e).getErrorStatus()),
-                      context.getString(R.string.title_err_method),
                       method);
         }
         else {
@@ -28,16 +26,13 @@ public class ShowMsg {
         String msg = "";
         if (errMsg.isEmpty()) {
             msg = String.format(
-                      "\t%s\n\t%s\n",
-                      context.getString(R.string.title_msg_result),
+                      "\t%s\n",
                       getCodeText(code));
         }
         else {
             msg = String.format(
-                      "\t%s\n\t%s\n\n\t%s\n\t%s\n",
-                      context.getString(R.string.title_msg_result),
+                      "\t%s\n\n\t%s\n",
                       getCodeText(code),
-                      context.getString(R.string.title_msg_description),
                       errMsg);
         }
         show(msg, context);

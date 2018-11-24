@@ -65,6 +65,15 @@ import butterknife.ButterKnife;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.epson.epos2.Epos2Exception;
+import com.epson.epos2.printer.Printer;
+import com.epson.epos2.printer.PrinterStatusInfo;
+import com.epson.epos2.printer.ReceiveListener;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.neopixl.pixlui.components.edittext.EditText;
 import com.neopixl.pixlui.components.textview.TextView;
 import com.pushbullet.android.extension.MessagingExtension;
@@ -95,6 +104,7 @@ import it.feio.android.omninotes.models.listeners.OnGeoUtilResultListener;
 import it.feio.android.omninotes.models.listeners.OnNoteSaved;
 import it.feio.android.omninotes.models.listeners.OnReminderPickedListener;
 import it.feio.android.omninotes.models.views.ExpandableHeightGridView;
+import it.feio.android.omninotes.printer.ShowMsg;
 import it.feio.android.omninotes.utils.*;
 import it.feio.android.omninotes.utils.Display;
 import it.feio.android.omninotes.utils.date.DateUtils;
@@ -113,7 +123,7 @@ import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 
 
-public class DetailFragment extends BaseFragment implements OnTouchListener,
+public class DetailFragment extends BaseFragment implements OnTouchListener, ReceiveListener,
 		OnAttachingFileListener, TextWatcher, CheckListChangedListener, OnNoteSaved,
 		OnGeoUtilResultListener {
 
@@ -198,6 +208,9 @@ public class DetailFragment extends BaseFragment implements OnTouchListener,
 	private ArrayList<String> mergedNotesIds;
 	private MainActivity mainActivity;
 	private boolean activityPausing;
+
+	// Printer
+	private Printer mPrinter = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -1035,6 +1048,368 @@ public class DetailFragment extends BaseFragment implements OnTouchListener,
 
 	private void printLabel() {
 		// 라벨 출력!
+		if (!initializeObject()) {
+			return;
+		}
+
+		if (!createData()) {
+			finalizeObject();
+			return;
+		}
+
+		if (!printData()) {
+			finalizeObject();
+			return;
+		}
+	}
+
+	private boolean initializeObject() {
+		try {
+			mPrinter = new Printer(Printer.TM_P20, Printer.MODEL_ANK, getActivity().getApplicationContext());
+		}
+		catch (Exception e) {
+			ShowMsg.showException(e, "Printer", getActivity().getApplicationContext());
+			return false;
+		}
+
+		mPrinter.setReceiveEventListener(this);
+
+		return true;
+	}
+
+	@Override
+	public void onPtrReceive(final Printer printerObj, final int code, final PrinterStatusInfo status, final String printJobId) {
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public synchronized void run() {
+				ShowMsg.showResult(code, makeErrorMessage(status), getActivity());
+
+				dispPrinterWarnings(status);
+
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						disconnectPrinter();
+					}
+				}).start();
+			}
+		});
+	}
+
+	private void finalizeObject() {
+		if (mPrinter == null) {
+			return;
+		}
+
+		mPrinter.clearCommandBuffer();
+
+		mPrinter.setReceiveEventListener(null);
+
+		mPrinter = null;
+	}
+
+	private boolean printData() {
+		if (mPrinter == null) {
+			return false;
+		}
+
+		if (!connectPrinter()) {
+			return false;
+		}
+
+		PrinterStatusInfo status = mPrinter.getStatus();
+
+		dispPrinterWarnings(status);
+
+		if (!isPrintable(status)) {
+			ShowMsg.showMsg(makeErrorMessage(status), getActivity());
+			try {
+				mPrinter.disconnect();
+			}
+			catch (Exception ex) {
+				// Do nothing
+			}
+			return false;
+		}
+
+		try {
+			mPrinter.sendData(Printer.PARAM_DEFAULT);
+		}
+		catch (Exception e) {
+			ShowMsg.showException(e, "sendData", getActivity());
+			try {
+				mPrinter.disconnect();
+			}
+			catch (Exception ex) {
+				// Do nothing
+			}
+			return false;
+		}
+
+		return true;
+	}
+	private boolean connectPrinter() {
+		boolean isBeginTransaction = false;
+
+		if (mPrinter == null) {
+			return false;
+		}
+
+		try {
+			mPrinter.connect("BT:00:01:90:AE:B9:D8", Printer.PARAM_DEFAULT);
+		}
+		catch (Exception e) {
+			ShowMsg.showException(e, "connect", getActivity());
+			return false;
+		}
+
+		try {
+			mPrinter.beginTransaction();
+			isBeginTransaction = true;
+		}
+		catch (Exception e) {
+			ShowMsg.showException(e, "beginTransaction", getActivity());
+		}
+
+		if (isBeginTransaction == false) {
+			try {
+				mPrinter.disconnect();
+			}
+			catch (Epos2Exception e) {
+				// Do nothing
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private void dispPrinterWarnings(PrinterStatusInfo status) {
+		if (status == null) {
+			return;
+		}
+
+		if (status.getPaper() == Printer.PAPER_NEAR_END) {
+			//warningsMsg += getString(R.string.handlingmsg_warn_receipt_near_end);
+			Toast.makeText(getActivity(), "Roll paper is nearly end.", Toast.LENGTH_LONG).show();
+		}
+
+		if (status.getBatteryLevel() == Printer.BATTERY_LEVEL_1) {
+			//warningsMsg += getString(R.string.handlingmsg_warn_battery_near_end);
+			Toast.makeText(getActivity(), "Battery level of printer is low.", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private boolean isPrintable(PrinterStatusInfo status) {
+		if (status == null) {
+			return false;
+		}
+
+		if (status.getConnection() == Printer.FALSE) {
+			return false;
+		}
+		else if (status.getOnline() == Printer.FALSE) {
+			return false;
+		}
+		else {
+			;//print available
+		}
+
+		return true;
+	}
+
+	private String makeErrorMessage(PrinterStatusInfo status) {
+		String msg = "";
+
+		if (status.getOnline() == Printer.FALSE) {
+			msg += getString(R.string.handlingmsg_err_offline);
+		}
+		if (status.getConnection() == Printer.FALSE) {
+			msg += getString(R.string.handlingmsg_err_no_response);
+		}
+		if (status.getCoverOpen() == Printer.TRUE) {
+			msg += getString(R.string.handlingmsg_err_cover_open);
+		}
+		if (status.getPaper() == Printer.PAPER_EMPTY) {
+			msg += getString(R.string.handlingmsg_err_receipt_end);
+		}
+		if (status.getPaperFeed() == Printer.TRUE || status.getPanelSwitch() == Printer.SWITCH_ON) {
+			msg += getString(R.string.handlingmsg_err_paper_feed);
+		}
+		if (status.getErrorStatus() == Printer.MECHANICAL_ERR || status.getErrorStatus() == Printer.AUTOCUTTER_ERR) {
+			msg += getString(R.string.handlingmsg_err_autocutter);
+			msg += getString(R.string.handlingmsg_err_need_recover);
+		}
+		if (status.getErrorStatus() == Printer.UNRECOVER_ERR) {
+			msg += getString(R.string.handlingmsg_err_unrecover);
+		}
+		if (status.getErrorStatus() == Printer.AUTORECOVER_ERR) {
+			if (status.getAutoRecoverError() == Printer.HEAD_OVERHEAT) {
+				msg += getString(R.string.handlingmsg_err_overheat);
+				msg += getString(R.string.handlingmsg_err_head);
+			}
+			if (status.getAutoRecoverError() == Printer.MOTOR_OVERHEAT) {
+				msg += getString(R.string.handlingmsg_err_overheat);
+				msg += getString(R.string.handlingmsg_err_motor);
+			}
+			if (status.getAutoRecoverError() == Printer.BATTERY_OVERHEAT) {
+				msg += getString(R.string.handlingmsg_err_overheat);
+				msg += getString(R.string.handlingmsg_err_battery);
+			}
+			if (status.getAutoRecoverError() == Printer.WRONG_PAPER) {
+				msg += getString(R.string.handlingmsg_err_wrong_paper);
+			}
+		}
+		if (status.getBatteryLevel() == Printer.BATTERY_LEVEL_0) {
+			msg += getString(R.string.handlingmsg_err_battery_real_end);
+		}
+
+		return msg;
+	}
+
+	private void disconnectPrinter() {
+		if (mPrinter == null) {
+			return;
+		}
+
+		try {
+			mPrinter.endTransaction();
+		}
+		catch (final Exception e) {
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public synchronized void run() {
+					ShowMsg.showException(e, "endTransaction", getActivity());
+				}
+			});
+		}
+
+		try {
+			mPrinter.disconnect();
+		}
+		catch (final Exception e) {
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public synchronized void run() {
+					ShowMsg.showException(e, "disconnect", getActivity());
+				}
+			});
+		}
+
+		finalizeObject();
+	}
+
+	private boolean createData() {
+		String method = "";
+		Bitmap logoData = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+		StringBuilder textData = new StringBuilder();
+		final int barcodeWidth = 2;
+		final int barcodeHeight = 100;
+
+		if (mPrinter == null) {
+			return false;
+		}
+
+		try {
+			method = "addTextAlign";
+			mPrinter.addTextAlign(Printer.ALIGN_CENTER);
+
+			method = "addImage";
+			mPrinter.addImage(logoData, 0, 0,
+					logoData.getWidth(),
+					logoData.getHeight(),
+					Printer.COLOR_1,
+					Printer.MODE_MONO,
+					Printer.HALFTONE_DITHER,
+					Printer.PARAM_DEFAULT,
+					Printer.COMPRESS_AUTO);
+
+			method = "addFeedLine";
+			mPrinter.addFeedLine(1);
+			textData.append("THE STORE 123 (555) 555 – 5555\n");
+			textData.append("STORE DIRECTOR – John Smith\n");
+			textData.append("한글도 테스트 해보자.\n");
+			textData.append("7/01/07 16:58 6153 05 0191 134\n");
+			textData.append("ST# 21 OP# 001 TE# 01 TR# 747\n");
+			textData.append("------------------------------\n");
+			method = "addText";
+			mPrinter.addText(textData.toString());
+			textData.delete(0, textData.length());
+
+			textData.append("461 WESTGATE BLACK 25  59.99 R\n");
+			textData.append("------------------------------\n");
+			method = "addText";
+			mPrinter.addText(textData.toString());
+			textData.delete(0, textData.length());
+
+			textData.append("SUBTOTAL                160.38\n");
+			textData.append("TAX                      14.43\n");
+			method = "addText";
+			mPrinter.addText(textData.toString());
+			textData.delete(0, textData.length());
+
+			method = "addTextSize";
+			mPrinter.addTextSize(2, 2);
+			method = "addText";
+			mPrinter.addText("TOTAL    174.81\n");
+			method = "addTextSize";
+			mPrinter.addTextSize(1, 1);
+			method = "addFeedLine";
+			mPrinter.addFeedLine(1);
+
+			textData.append("CASH                    200.00\n");
+			textData.append("CHANGE                   25.19\n");
+			textData.append("------------------------------\n");
+			method = "addText";
+			mPrinter.addText(textData.toString());
+			textData.delete(0, textData.length());
+
+			textData.append("Purchased item total number\n");
+			textData.append("Sign Up and Save !\n");
+			textData.append("With Preferred Saving Card\n");
+			method = "addText";
+			mPrinter.addText(textData.toString());
+			textData.delete(0, textData.length());
+			method = "addFeedLine";
+			mPrinter.addFeedLine(2);
+
+			method = "addBarcode";
+			mPrinter.addBarcode("01209457",
+					Printer.BARCODE_CODE39,
+					Printer.HRI_BELOW,
+					Printer.FONT_A,
+					barcodeWidth,
+					barcodeHeight);
+
+			String text="TESTS"; // Whatever you need to encode in the QR code
+			MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+			try {
+				BitMatrix bitMatrix = multiFormatWriter.encode(text, BarcodeFormat.QR_CODE,200,200);
+				BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+				Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+				mPrinter.addImage(bitmap, 0, 0,
+						bitmap.getWidth(),
+						bitmap.getHeight(),
+						Printer.COLOR_1,
+						Printer.MODE_MONO,
+						Printer.HALFTONE_DITHER,
+						Printer.PARAM_DEFAULT,
+						Printer.COMPRESS_AUTO);
+			} catch (WriterException e) {
+				e.printStackTrace();
+			}
+
+			method = "addCut";
+			mPrinter.addCut(Printer.CUT_FEED);
+		}
+		catch (Exception e) {
+			ShowMsg.showException(e, method, getActivity());
+			return false;
+		}
+
+		textData = null;
+
+		return true;
 	}
 
 	private void navigateUp() {

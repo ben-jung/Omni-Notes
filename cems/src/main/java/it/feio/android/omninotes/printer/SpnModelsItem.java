@@ -1,4 +1,4 @@
-package com.epson.epos2_printer;
+package it.feio.android.omninotes.printer;
 
 public class SpnModelsItem {
     private String mModelName = "";
