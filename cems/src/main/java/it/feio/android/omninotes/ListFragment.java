@@ -402,17 +402,6 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
 
         @Override
         public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
-            Integer[] protectedActions = {R.id.menu_select_all, R.id.menu_merge};
-            if (!Arrays.asList(protectedActions).contains(item.getItemId())) {
-                mainActivity.requestPassword(mainActivity, getSelectedNotes(),
-                        passwordConfirmed -> {
-                            if (passwordConfirmed) {
-                                performAction(item, mode);
-                            }
-                        });
-            } else {
-                performAction(item, mode);
-            }
             return true;
         }
     }
@@ -572,25 +561,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
             menu.findItem(R.id.menu_untrash).setVisible(true);
             menu.findItem(R.id.menu_delete).setVisible(true);
         } else {
-            if (getSelectedCount() == 1) {
-                menu.findItem(R.id.menu_share).setVisible(true);
-                menu.findItem(R.id.menu_merge).setVisible(false);
-                menu.findItem(R.id.menu_archive)
-                        .setVisible(showArchive && !getSelectedNotes().get(0).isArchived
-                                ());
-                menu.findItem(R.id.menu_unarchive)
-                        .setVisible(showUnarchive && getSelectedNotes().get(0).isArchived
-                                ());
-            } else {
-                menu.findItem(R.id.menu_share).setVisible(false);
-                menu.findItem(R.id.menu_merge).setVisible(true);
-                menu.findItem(R.id.menu_archive).setVisible(showArchive);
-                menu.findItem(R.id.menu_unarchive).setVisible(showUnarchive);
-
-            }
-            menu.findItem(R.id.menu_add_reminder).setVisible(true);
             menu.findItem(R.id.menu_category).setVisible(true);
-			menu.findItem(R.id.menu_uncomplete_checklists).setVisible(false);
             menu.findItem(R.id.menu_tags).setVisible(true);
             menu.findItem(R.id.menu_trash).setVisible(true);
         }
@@ -710,19 +681,10 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
             fab.hideFab();
         }
         menu.findItem(R.id.menu_search).setVisible(!drawerOpen);
-		menu.findItem(R.id.menu_filter).setVisible(!drawerOpen && !filterPastReminders && navigationReminders &&
-				!searchViewHasFocus);
-		menu.findItem(R.id.menu_filter_remove).setVisible(!drawerOpen && filterPastReminders && navigationReminders
-				&& !searchViewHasFocus);
-		menu.findItem(R.id.menu_filter_category).setVisible(!drawerOpen && !filterArchivedInCategory &&
-				navigationCategory && !searchViewHasFocus);
-		menu.findItem(R.id.menu_filter_category_remove).setVisible(!drawerOpen && filterArchivedInCategory &&
-				navigationCategory && !searchViewHasFocus);
 		menu.findItem(R.id.menu_sort).setVisible(!drawerOpen && !navigationReminders && !searchViewHasFocus);
         menu.findItem(R.id.menu_expanded_view).setVisible(!drawerOpen && !expandedView && !searchViewHasFocus);
         menu.findItem(R.id.menu_contracted_view).setVisible(!drawerOpen && expandedView && !searchViewHasFocus);
         menu.findItem(R.id.menu_empty_trash).setVisible(!drawerOpen && navigationTrash);
-		menu.findItem(R.id.menu_uncomplete_checklists).setVisible(searchViewHasFocus);
         menu.findItem(R.id.menu_tags).setVisible(searchViewHasFocus);
     }
 
@@ -756,20 +718,6 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
                         mainActivity.getDrawerLayout().openDrawer(GravityCompat.START);
                     }
                     break;
-				case R.id.menu_filter:
-					filterReminders(true);
-					break;
-				case R.id.menu_filter_remove:
-					filterReminders(false);
-					break;
-				case R.id.menu_filter_category:
-					filterCategoryArchived(true);
-					break;
-				case R.id.menu_filter_category_remove:
-					filterCategoryArchived(false);
-				case R.id.menu_uncomplete_checklists:
-					filterByUncompleteChecklists();
-					break;
                 case R.id.menu_tags:
                     filterByTags();
                     break;
@@ -796,18 +744,6 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
                 case R.id.menu_tags:
                     tagNotes();
                     break;
-                case R.id.menu_share:
-                    share();
-                    break;
-                case R.id.menu_merge:
-                    merge();
-                    break;
-                case R.id.menu_archive:
-                    archiveNotes(true);
-                    break;
-                case R.id.menu_unarchive:
-                    archiveNotes(false);
-                    break;
                 case R.id.menu_trash:
                     trashNotes(true);
                     break;
@@ -820,12 +756,6 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
                 case R.id.menu_select_all:
                     selectAllNotes();
                     break;
-                case R.id.menu_add_reminder:
-                    addReminders();
-                    break;
-//                case R.id.menu_synchronize:
-//                    synchronizeSelectedNotes();
-//                    break;
             }
         }
 

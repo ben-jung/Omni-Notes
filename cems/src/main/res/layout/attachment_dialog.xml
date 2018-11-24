@@ -23,6 +23,40 @@
               android:orientation="vertical">
 
     <com.neopixl.pixlui.components.textview.TextView
+        android:id="@+id/location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/icon_selector"
+        android:drawableLeft="@drawable/ic_pin_drop_black_24dp"
+        android:drawableStart="@drawable/ic_pin_drop_black_24dp"
+        android:drawablePadding="@dimen/attachment_dialog_drawable_padding"
+        android:padding="@dimen/attachment_dialog_items_padding"
+        android:paddingStart="@dimen/horizontal_margin"
+        android:paddingLeft="@dimen/horizontal_margin"
+        android:paddingEnd="@dimen/horizontal_margin"
+        android:text="@string/location"
+        android:textSize="@dimen/attachment_dialog_text_size"
+        pixlui:typeface="Roboto-Regular.ttf"
+        android:textColor="@color/text_gray"/>
+
+    <com.neopixl.pixlui.components.textview.TextView
+        android:id="@+id/timestamp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/icon_selector"
+        android:drawableLeft="@drawable/ic_access_time_black_24px"
+        android:drawableStart="@drawable/ic_access_time_black_24px"
+        android:drawablePadding="@dimen/attachment_dialog_drawable_padding"
+        android:padding="@dimen/attachment_dialog_items_padding"
+        android:paddingStart="@dimen/horizontal_margin"
+        android:paddingLeft="@dimen/horizontal_margin"
+        android:paddingEnd="@dimen/horizontal_margin"
+        android:text="@string/timestamp"
+        android:textSize="@dimen/attachment_dialog_text_size"
+        pixlui:typeface="Roboto-Regular.ttf"
+        android:textColor="@color/text_gray"/>
+
+    <com.neopixl.pixlui.components.textview.TextView
             android:id="@+id/camera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,23 +91,6 @@
             android:textColor="@color/text_gray"/>
 
     <com.neopixl.pixlui.components.textview.TextView
-            android:id="@+id/files"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/icon_selector"
-            android:drawableLeft="@drawable/ic_insert_drive_file_black_24dp"
-            android:drawableStart="@drawable/ic_insert_drive_file_black_24dp"
-            android:drawablePadding="@dimen/attachment_dialog_drawable_padding"
-            android:padding="@dimen/attachment_dialog_items_padding"
-            android:paddingStart="@dimen/horizontal_margin"
-            android:paddingLeft="@dimen/horizontal_margin"
-            android:paddingEnd="@dimen/horizontal_margin"
-            android:text="@string/files"
-            android:textSize="@dimen/attachment_dialog_text_size"
-            pixlui:typeface="Roboto-Regular.ttf"
-            android:textColor="@color/text_gray"/>
-
-    <com.neopixl.pixlui.components.textview.TextView
             android:id="@+id/recording"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -102,61 +119,8 @@
             android:paddingStart="@dimen/horizontal_margin"
             android:paddingLeft="@dimen/horizontal_margin"
             android:paddingEnd="@dimen/horizontal_margin"
-            android:text="@string/sketch"
+            android:text="Signature"
             android:textSize="@dimen/attachment_dialog_text_size"
             pixlui:typeface="Roboto-Regular.ttf"
             android:textColor="@color/text_gray"/>
-
-    <com.neopixl.pixlui.components.textview.TextView
-            android:id="@+id/location"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/icon_selector"
-            android:drawableLeft="@drawable/ic_pin_drop_black_24dp"
-            android:drawableStart="@drawable/ic_pin_drop_black_24dp"
-            android:drawablePadding="@dimen/attachment_dialog_drawable_padding"
-            android:padding="@dimen/attachment_dialog_items_padding"
-            android:paddingStart="@dimen/horizontal_margin"
-            android:paddingLeft="@dimen/horizontal_margin"
-            android:paddingEnd="@dimen/horizontal_margin"
-            android:text="@string/location"
-            android:textSize="@dimen/attachment_dialog_text_size"
-            pixlui:typeface="Roboto-Regular.ttf"
-            android:textColor="@color/text_gray"/>
-
-    <com.neopixl.pixlui.components.textview.TextView
-            android:id="@+id/timestamp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/icon_selector"
-            android:drawableLeft="@drawable/ic_access_time_black_24px"
-            android:drawableStart="@drawable/ic_access_time_black_24px"
-            android:drawablePadding="@dimen/attachment_dialog_drawable_padding"
-            android:padding="@dimen/attachment_dialog_items_padding"
-            android:paddingStart="@dimen/horizontal_margin"
-            android:paddingLeft="@dimen/horizontal_margin"
-            android:paddingEnd="@dimen/horizontal_margin"
-            android:text="@string/timestamp"
-            android:textSize="@dimen/attachment_dialog_text_size"
-            pixlui:typeface="Roboto-Regular.ttf"
-            android:textColor="@color/text_gray"/>
-
-    <com.neopixl.pixlui.components.textview.TextView
-            android:id="@+id/pushbullet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/icon_selector"
-            android:drawableLeft="@drawable/ic_laptop_black_24dp"
-            android:drawableStart="@drawable/ic_laptop_black_24dp"
-            android:drawablePadding="@dimen/attachment_dialog_drawable_padding"
-            android:padding="@dimen/attachment_dialog_items_padding"
-            android:paddingStart="@dimen/horizontal_margin"
-            android:paddingLeft="@dimen/horizontal_margin"
-            android:paddingEnd="@dimen/horizontal_margin"
-            android:text="@string/pushbullet"
-            android:visibility="gone"
-            android:textSize="@dimen/attachment_dialog_text_size"
-            pixlui:typeface="Roboto-Regular.ttf"
-            android:textColor="@color/text_gray"/>
-
 </LinearLayout>

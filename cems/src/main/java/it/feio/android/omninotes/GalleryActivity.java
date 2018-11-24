@@ -159,9 +159,6 @@ public class GalleryActivity extends ActionBarActivity {
             case android.R.id.home:
                 onBackPressed();
                 break;
-            case R.id.menu_gallery_share:
-                shareMedia();
-                break;
             case R.id.menu_gallery:
                 viewMedia();
                 break;

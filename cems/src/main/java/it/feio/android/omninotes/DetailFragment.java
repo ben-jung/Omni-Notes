@@ -113,7 +113,7 @@ import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 
 
-public class DetailFragment extends BaseFragment implements OnReminderPickedListener, OnTouchListener,
+public class DetailFragment extends BaseFragment implements OnTouchListener,
 		OnAttachingFileListener, TextWatcher, CheckListChangedListener, OnNoteSaved,
 		OnGeoUtilResultListener {
 
@@ -143,12 +143,6 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 	TextView locationTextView;
 	@BindView(R.id.detail_timestamps)
 	View timestampsView;
-	@BindView(R.id.reminder_layout)
-	LinearLayout reminder_layout;
-	@BindView(R.id.reminder_icon)
-	ImageView reminderIcon;
-	@BindView(R.id.datetime)
-	TextView datetime;
 	@BindView(R.id.detail_tile_card)
 	View titleCardView;
 	@BindView(R.id.content_wrapper)
@@ -498,8 +492,6 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 
 		initViewAttachments();
 
-		initViewReminder();
-
 		initViewFooter();
 	}
 
@@ -518,44 +510,6 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 				lastModification : "");
 		if (lastModificationTextView.getText().length() == 0)
 			lastModificationTextView.setVisibility(View.GONE);
-	}
-
-	private void initViewReminder() {
-
-		// Preparation for reminder icon
-		reminder_layout.setOnClickListener(v -> {
-			int pickerType = prefs.getBoolean("settings_simple_calendar", false) ? ReminderPickers.TYPE_AOSP :
-					ReminderPickers.TYPE_GOOGLE;
-			ReminderPickers reminderPicker = new ReminderPickers(mainActivity, mFragment, pickerType);
-			reminderPicker.pick(DateUtils.getPresetReminder(noteTmp.getAlarm()), noteTmp
-					.getRecurrenceRule());
-			onDateSetListener = reminderPicker;
-			onTimeSetListener = reminderPicker;
-		});
-
-		reminder_layout.setOnLongClickListener(v -> {
-			MaterialDialog dialog = new MaterialDialog.Builder(mainActivity)
-					.content(R.string.remove_reminder)
-					.positiveText(R.string.ok)
-					.callback(new MaterialDialog.ButtonCallback() {
-						@Override
-						public void onPositive(MaterialDialog materialDialog) {
-							ReminderHelper.removeReminder(OmniNotes.getAppContext(), noteTmp);
-							noteTmp.setAlarm(null);
-							reminderIcon.setImageResource(R.drawable.ic_alarm_black_18dp);
-							datetime.setText("");
-						}
-					}).build();
-			dialog.show();
-			return true;
-		});
-
-		// Reminder
-		String reminderString = initReminder(noteTmp);
-		if (!StringUtils.isEmpty(reminderString)) {
-			reminderIcon.setImageResource(R.drawable.ic_alarm_add_black_18dp);
-			datetime.setText(reminderString);
-		}
 	}
 
 	private void initViewLocation() {
@@ -988,20 +942,16 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 
 		boolean newNote = noteTmp.get_id() == null;
 
-		menu.findItem(R.id.menu_checklist_on).setVisible(!noteTmp.isChecklist());
-		menu.findItem(R.id.menu_checklist_off).setVisible(noteTmp.isChecklist());
-		menu.findItem(R.id.menu_lock).setVisible(!noteTmp.isLocked());
-		menu.findItem(R.id.menu_unlock).setVisible(noteTmp.isLocked());
 		// If note is trashed only this options will be available from menu
 		if (noteTmp.isTrashed()) {
 			menu.findItem(R.id.menu_untrash).setVisible(true);
 			menu.findItem(R.id.menu_delete).setVisible(true);
 			// Otherwise all other actions will be available
 		} else {
-			menu.findItem(R.id.menu_add_shortcut).setVisible(!newNote);
-			menu.findItem(R.id.menu_archive).setVisible(!newNote && !noteTmp.isArchived());
-			menu.findItem(R.id.menu_unarchive).setVisible(!newNote && noteTmp.isArchived());
 			menu.findItem(R.id.menu_trash).setVisible(!newNote);
+			menu.findItem(R.id.menu_attachment).setVisible(newNote);
+			menu.findItem(R.id.menu_category).setVisible(newNote);
+			menu.findItem(R.id.menu_tag).setVisible(newNote);
 		}
 	}
 
@@ -1051,44 +1001,18 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 			case R.id.menu_category:
 				categorizeNote();
 				break;
-			case R.id.menu_share:
-				shareNote();
-				break;
-			case R.id.menu_checklist_on:
-				toggleChecklist();
-				break;
-			case R.id.menu_checklist_off:
-				toggleChecklist();
-				break;
-			case R.id.menu_lock:
-				lockNote();
-				break;
-			case R.id.menu_unlock:
-				lockNote();
-				break;
-			case R.id.menu_add_shortcut:
-				addShortcut();
-				break;
-			case R.id.menu_archive:
-				archiveNote(true);
-				break;
-			case R.id.menu_unarchive:
-				archiveNote(false);
-				break;
 			case R.id.menu_trash:
 				trashNote(true);
 				break;
 			case R.id.menu_untrash:
 				trashNote(false);
 				break;
-			case R.id.menu_discard_changes:
-				discard();
-				break;
 			case R.id.menu_delete:
 				deleteNote();
 				break;
 			case R.id.menu_note_info:
-				showNoteInfo();
+				printLabel();
+				//showNoteInfo();
 				break;
 			default:
 				Log.w(Constants.TAG, "Invalid menu option selected");
@@ -1107,6 +1031,10 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 		intent.putExtra(Constants.INTENT_NOTE, (android.os.Parcelable) noteTmp);
 		startActivity(intent);
 
+	}
+
+	private void printLabel() {
+		// 라벨 출력!
 	}
 
 	private void navigateUp() {
@@ -1265,9 +1193,6 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 		// Video recording
 		android.widget.TextView videoSelection = (android.widget.TextView) layout.findViewById(R.id.video);
 		videoSelection.setOnClickListener(new AttachmentOnClickListener());
-		// Files
-		android.widget.TextView filesSelection = (android.widget.TextView) layout.findViewById(R.id.files);
-		filesSelection.setOnClickListener(new AttachmentOnClickListener());
 		// Sketch
 		android.widget.TextView sketchSelection = (android.widget.TextView) layout.findViewById(R.id.sketch);
 		sketchSelection.setOnClickListener(new AttachmentOnClickListener());
@@ -1277,10 +1202,6 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 		// Time
 		android.widget.TextView timeStampSelection = (android.widget.TextView) layout.findViewById(R.id.timestamp);
 		timeStampSelection.setOnClickListener(new AttachmentOnClickListener());
-		// Desktop note with PushBullet
-		android.widget.TextView pushbulletSelection = (android.widget.TextView) layout.findViewById(R.id.pushbullet);
-		pushbulletSelection.setVisibility(View.VISIBLE);
-		pushbulletSelection.setOnClickListener(new AttachmentOnClickListener());
 	}
 
 	private void takePhoto() {
@@ -2015,25 +1936,6 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 	}
 
 	@Override
-	public void onReminderPicked(long reminder) {
-		noteTmp.setAlarm(reminder);
-		if (mFragment.isAdded()) {
-			reminderIcon.setImageResource(R.drawable.ic_alarm_black_18dp);
-			datetime.setText(DateHelper.getNoteReminderText(reminder));
-		}
-	}
-
-	@Override
-	public void onRecurrenceReminderPicked(String recurrenceRule) {
-		noteTmp.setRecurrenceRule(recurrenceRule);
-		if (!TextUtils.isEmpty(recurrenceRule)) {
-			Log.d(Constants.TAG, "Recurrent reminder set: " + recurrenceRule);
-			datetime.setText(DateHelper.getNoteRecurrentReminderText(parseLong(noteTmp
-					.getAlarm()), recurrenceRule));
-		}
-	}
-
-	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 		scrollContent();
 	}
@@ -2203,14 +2105,6 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 				case R.id.video:
 					takeVideo();
 					break;
-				case R.id.files:
-					if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) ==
-							PackageManager.PERMISSION_GRANTED) {
-						startGetContentAction();
-					} else {
-						askReadExternalStoragePermission();
-					}
-					break;
 				case R.id.sketch:
 					takeSketch(null);
 					break;
@@ -2219,13 +2113,6 @@ public class DetailFragment extends BaseFragment implements OnReminderPickedList
 					break;
 				case R.id.timestamp:
 					addTimestamp();
-					break;
-				case R.id.pushbullet:
-					MessagingExtension.mirrorMessage(mainActivity, getString(R.string.app_name),
-							getString(R.string.pushbullet),
-							getNoteContent(), BitmapFactory.decodeResource(getResources(),
-									R.drawable.ic_stat_literal_icon),
-							null, 0);
 					break;
 				default:
 					Log.e(Constants.TAG, "Wrong element choosen: " + v.getId());

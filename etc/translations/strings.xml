@@ -103,7 +103,7 @@
     <string name="delete_this_category">Delete this category</string>
     <string name="category">Category</string>
     <string name="categorize_as">Categorize as</string>
-    <string name="title_activity_category">Edit category</string>
+    <string name="title_activity_category">Crime Case</string>
     <string name="delete_unused_category_confirmation">Confirm category deletion?</string>
     <string name="delete_category_confirmation">This category is used by some notes.\nConfirm notes un-categorization and category deletion?</string>
     <string name="discard">Discard</string>
@@ -127,7 +127,7 @@
     <string name="remove_checklist">Remove checklist?</string>
     <string name="checklist_keep_checked">Keep checked items</string>
     <string name="checklist_keep_symbols">Keep check marks</string>
-    <string name="sketch">Sketch</string>
+    <string name="sketch">Signature</string>
     <string name="crash_dialog_text">Something went wrong in Omni Notes\nSend automatic report to developer?</string>
     <string name="crash_dialog_comment_prompt">Insert comment here (optional):</string>
     <string name="crash_toast">Something went wrong in Omni Notes\nA report has been sent report to the developer!</string>

@@ -58,8 +58,6 @@
     <string-array name="sortable_columns_human_readable">
         <item>Title</item>
         <item>Creation date</item>
-        <item>Last modification date</item>
-        <item>Reminder date</item>
     </string-array>
 
     <string-array name="checked_items_behavior">
