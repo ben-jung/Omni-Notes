@@ -116,6 +116,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
@@ -963,7 +964,6 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 		} else {
 			menu.findItem(R.id.menu_trash).setVisible(!newNote);
 			menu.findItem(R.id.menu_attachment).setVisible(newNote);
-			menu.findItem(R.id.menu_category).setVisible(newNote);
 			menu.findItem(R.id.menu_tag).setVisible(newNote);
 		}
 	}
@@ -1122,7 +1122,7 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 		dispPrinterWarnings(status);
 
 		if (!isPrintable(status)) {
-			ShowMsg.showMsg(makeErrorMessage(status), getActivity());
+			ShowMsg.showMsg(makeErrorMessage(status), getActivity().getApplicationContext());
 			try {
 				mPrinter.disconnect();
 			}
@@ -1136,7 +1136,7 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			mPrinter.sendData(Printer.PARAM_DEFAULT);
 		}
 		catch (Exception e) {
-			ShowMsg.showException(e, "sendData", getActivity());
+			ShowMsg.showException(e, "sendData", getActivity().getApplicationContext());
 			try {
 				mPrinter.disconnect();
 			}
@@ -1159,7 +1159,7 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			mPrinter.connect("BT:00:01:90:AE:B9:D8", Printer.PARAM_DEFAULT);
 		}
 		catch (Exception e) {
-			ShowMsg.showException(e, "connect", getActivity());
+			ShowMsg.showException(e, "connect", getActivity().getApplicationContext());
 			return false;
 		}
 
@@ -1168,7 +1168,7 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			isBeginTransaction = true;
 		}
 		catch (Exception e) {
-			ShowMsg.showException(e, "beginTransaction", getActivity());
+			ShowMsg.showException(e, "beginTransaction", getActivity().getApplicationContext());
 		}
 
 		if (isBeginTransaction == false) {
@@ -1191,12 +1191,12 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 
 		if (status.getPaper() == Printer.PAPER_NEAR_END) {
 			//warningsMsg += getString(R.string.handlingmsg_warn_receipt_near_end);
-			Toast.makeText(getActivity(), "Roll paper is nearly end.", Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity().getApplicationContext(), "Roll paper is nearly end.", Toast.LENGTH_LONG).show();
 		}
 
 		if (status.getBatteryLevel() == Printer.BATTERY_LEVEL_1) {
 			//warningsMsg += getString(R.string.handlingmsg_warn_battery_near_end);
-			Toast.makeText(getActivity(), "Battery level of printer is low.", Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity().getApplicationContext(), "Battery level of printer is low.", Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -1303,18 +1303,13 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 		String method = "";
 		Bitmap logoData = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
 		StringBuilder textData = new StringBuilder();
-		final int barcodeWidth = 2;
-		final int barcodeHeight = 100;
 
 		if (mPrinter == null) {
 			return false;
 		}
 
 		try {
-			method = "addTextAlign";
 			mPrinter.addTextAlign(Printer.ALIGN_CENTER);
-
-			method = "addImage";
 			mPrinter.addImage(logoData, 0, 0,
 					logoData.getWidth(),
 					logoData.getHeight(),
@@ -1323,68 +1318,52 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 					Printer.HALFTONE_DITHER,
 					Printer.PARAM_DEFAULT,
 					Printer.COMPRESS_AUTO);
-
-			method = "addFeedLine";
 			mPrinter.addFeedLine(1);
-			textData.append("THE STORE 123 (555) 555 – 5555\n");
-			textData.append("STORE DIRECTOR – John Smith\n");
-			textData.append("한글도 테스트 해보자.\n");
-			textData.append("7/01/07 16:58 6153 05 0191 134\n");
-			textData.append("ST# 21 OP# 001 TE# 01 TR# 747\n");
-			textData.append("------------------------------\n");
-			method = "addText";
-			mPrinter.addText(textData.toString());
-			textData.delete(0, textData.length());
+			mPrinter.addText("Criminal Evidence Management System\n");
+			mPrinter.addFeedLine(1);
+			mPrinter.addText("-----------------------------------\n");
+			mPrinter.addFeedLine(1);
 
-			textData.append("461 WESTGATE BLACK 25  59.99 R\n");
-			textData.append("------------------------------\n");
-			method = "addText";
-			mPrinter.addText(textData.toString());
-			textData.delete(0, textData.length());
-
-			textData.append("SUBTOTAL                160.38\n");
-			textData.append("TAX                      14.43\n");
-			method = "addText";
-			mPrinter.addText(textData.toString());
-			textData.delete(0, textData.length());
-
-			method = "addTextSize";
 			mPrinter.addTextSize(2, 2);
-			method = "addText";
-			mPrinter.addText("TOTAL    174.81\n");
-			method = "addTextSize";
+			String title = noteTmp.getCategory().toString() + "\n"
+					+ ((EditText) titleWrapperView.findViewById(R.id.detail_title)).getText().toString() + "\n";
+			mPrinter.addText(title);
 			mPrinter.addTextSize(1, 1);
+			mPrinter.addFeedLine(1);
+			mPrinter.addText("-----------------------------------\n");
+			mPrinter.addFeedLine(1);
+			mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+			mPrinter.addText(content.getText().toString());
+			mPrinter.addFeedLine(1);
+			mPrinter.addTextAlign(Printer.ALIGN_CENTER);
+			mPrinter.addText("-----------------------------------\n");
+			mPrinter.addFeedLine(1);
+			View capture = mGridView;
+			capture.setDrawingCacheEnabled(true);
+			capture.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+			capture.buildDrawingCache();
+			if(capture.getDrawingCache() != null) {
+				Bitmap snapshot = Bitmap.createBitmap(capture.getDrawingCache());
+				capture.setDrawingCacheEnabled(false);
+				capture.destroyDrawingCache();
+
+				mPrinter.addImage(snapshot, 0, 0,
+						snapshot.getWidth(),
+						snapshot.getHeight(),
+						Printer.COLOR_1,
+						Printer.MODE_MONO,
+						Printer.HALFTONE_DITHER,
+						Printer.PARAM_DEFAULT,
+						Printer.COMPRESS_NONE);
+			}
+
 			method = "addFeedLine";
 			mPrinter.addFeedLine(1);
-
-			textData.append("CASH                    200.00\n");
-			textData.append("CHANGE                   25.19\n");
-			textData.append("------------------------------\n");
-			method = "addText";
-			mPrinter.addText(textData.toString());
-			textData.delete(0, textData.length());
-
-			textData.append("Purchased item total number\n");
-			textData.append("Sign Up and Save !\n");
-			textData.append("With Preferred Saving Card\n");
-			method = "addText";
-			mPrinter.addText(textData.toString());
-			textData.delete(0, textData.length());
-			method = "addFeedLine";
-			mPrinter.addFeedLine(2);
-
-			method = "addBarcode";
-			mPrinter.addBarcode("01209457",
-					Printer.BARCODE_CODE39,
-					Printer.HRI_BELOW,
-					Printer.FONT_A,
-					barcodeWidth,
-					barcodeHeight);
-
-			String text="TESTS"; // Whatever you need to encode in the QR code
+			mPrinter.addText("-----------------------------------\n");
+			// Whatever you need to encode in the QR code
 			MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
 			try {
-				BitMatrix bitMatrix = multiFormatWriter.encode(text, BarcodeFormat.QR_CODE,200,200);
+				BitMatrix bitMatrix = multiFormatWriter.encode(title, BarcodeFormat.QR_CODE,200,200);
 				BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
 				Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
 				mPrinter.addImage(bitmap, 0, 0,
@@ -1399,7 +1378,16 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 				e.printStackTrace();
 			}
 
-			method = "addCut";
+			/*
+			method = "addBarcode";
+			mPrinter.addBarcode("01209457",
+					Printer.BARCODE_CODE39,
+					Printer.HRI_BELOW,
+					Printer.FONT_A,
+					2,
+					100);
+			*/
+
 			mPrinter.addCut(Printer.CUT_FEED);
 		}
 		catch (Exception e) {
@@ -1407,59 +1395,12 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			return false;
 		}
 
-		textData = null;
-
 		return true;
 	}
 
 	private void navigateUp() {
 		afterSavedReturnsToList = true;
 		saveAndExit(this);
-	}
-
-	/**
-	 *
-	 */
-	private void toggleChecklist() {
-
-		// In case checklist is active a prompt will ask about many options
-		// to decide hot to convert back to simple text
-		if (!noteTmp.isChecklist()) {
-			toggleChecklist2();
-			return;
-		}
-
-		// If checklist is active but no items are checked the conversion in done automatically
-		// without prompting user
-		if (mChecklistManager.getCheckedCount() == 0) {
-			toggleChecklist2(true, false);
-			return;
-		}
-
-		// Inflate the popup_layout.xml
-		LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-		final View layout = inflater.inflate(R.layout.dialog_remove_checklist_layout,
-				(ViewGroup) getView().findViewById(R.id.layout_root));
-
-		// Retrieves options checkboxes and initialize their values
-		final CheckBox keepChecked = (CheckBox) layout.findViewById(R.id.checklist_keep_checked);
-		final CheckBox keepCheckmarks = (CheckBox) layout.findViewById(R.id.checklist_keep_checkmarks);
-		keepChecked.setChecked(prefs.getBoolean(Constants.PREF_KEEP_CHECKED, true));
-		keepCheckmarks.setChecked(prefs.getBoolean(Constants.PREF_KEEP_CHECKMARKS, true));
-
-		new MaterialDialog.Builder(mainActivity)
-				.customView(layout, false)
-				.positiveText(R.string.ok)
-				.callback(new MaterialDialog.ButtonCallback() {
-					@Override
-					public void onPositive(MaterialDialog materialDialog) {
-						prefs.edit()
-								.putBoolean(Constants.PREF_KEEP_CHECKED, keepChecked.isChecked())
-								.putBoolean(Constants.PREF_KEEP_CHECKMARKS, keepCheckmarks.isChecked())
-								.apply();
-						toggleChecklist2();
-					}
-				}).build().show();
 	}
 
 	/**
@@ -1650,7 +1591,7 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 	private void addTimestamp() {
 		Editable editable = content.getText();
 		int position = content.getSelectionStart();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-d'T'HH:mm:ssZ");
 		String dateStamp = dateFormat.format(new Date().getTime()) + " ";
 		if (noteTmp.isChecklist()) {
 			if (mChecklistManager.getFocusedItemView() != null) {
@@ -1732,50 +1673,6 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			String name = FileHelper.getNameFromUri(mainActivity, uri);
 			new AttachmentTask(this, uri, name, this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
-	}
-
-	/**
-	 * Discards changes done to the note and eventually delete new attachments
-	 */
-	private void discard() {
-		// Checks if some new files have been attached and must be removed
-		if (!noteTmp.getAttachmentsList().equals(note.getAttachmentsList())) {
-			for (Attachment newAttachment : noteTmp.getAttachmentsList()) {
-				if (!note.getAttachmentsList().contains(newAttachment)) {
-					StorageHelper.delete(mainActivity, newAttachment.getUri().getPath());
-				}
-			}
-		}
-
-		goBack = true;
-
-		if (!noteTmp.equals(noteOriginal)) {
-			// Restore original status of the note
-			if (noteOriginal.get_id() == null) {
-				mainActivity.deleteNote(noteTmp);
-				goHome();
-			} else {
-				new SaveNoteTask(this, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, noteOriginal);
-			}
-			MainActivity.notifyAppWidgets(mainActivity);
-		} else {
-			goHome();
-		}
-	}
-
-	@SuppressLint("NewApi")
-	private void archiveNote(boolean archive) {
-		// Simply go back if is a new note
-		if (noteTmp.get_id() == null) {
-			goHome();
-			return;
-		}
-
-		noteTmp.setArchived(archive);
-		goBack = true;
-		exitMessage = archive ? getString(R.string.note_archived) : getString(R.string.note_unarchived);
-		exitCroutonStyle = archive ? ONStyle.WARN : ONStyle.INFO;
-		saveNote(this);
 	}
 
 	@SuppressLint("NewApi")
@@ -1935,43 +1832,6 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 		return contentText;
 	}
 
-	/**
-	 * Updates share intent
-	 */
-	private void shareNote() {
-		Note sharedNote = new Note(noteTmp);
-		sharedNote.setTitle(getNoteTitle());
-		sharedNote.setContent(getNoteContent());
-		mainActivity.shareNote(sharedNote);
-	}
-
-	/**
-	 * Notes locking with security password to avoid viewing, editing or deleting from unauthorized
-	 */
-	private void lockNote() {
-		Log.d(Constants.TAG, "Locking or unlocking note " + note.get_id());
-
-		// If security password is not set yes will be set right now
-		if (prefs.getString(Constants.PREF_PASSWORD, null) == null) {
-			Intent passwordIntent = new Intent(mainActivity, PasswordActivity.class);
-			startActivityForResult(passwordIntent, SET_PASSWORD);
-			return;
-		}
-
-		// If password has already been inserted will not be asked again
-		if (noteTmp.isPasswordChecked() || prefs.getBoolean("settings_password_access", false)) {
-			lockUnlock();
-			return;
-		}
-
-		// Password will be requested here
-		PasswordHelper.requestPassword(mainActivity, passwordConfirmed -> {
-			if (passwordConfirmed) {
-				lockUnlock();
-			}
-		});
-	}
-
 	private void lockUnlock() {
 		// Empty password has been set
 		if (prefs.getString(Constants.PREF_PASSWORD, null) == null) {
@@ -1982,22 +1842,6 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 		mainActivity.supportInvalidateOptionsMenu();
 		noteTmp.setLocked(!noteTmp.isLocked());
 		noteTmp.setPasswordChecked(true);
-	}
-
-	/**
-	 * Used to set actual reminder state when initializing a note to be edited
-	 */
-	private String initReminder(Note note) {
-		if (noteTmp.getAlarm() == null) {
-			return "";
-		}
-		long reminder = parseLong(note.getAlarm());
-		String rrule = note.getRecurrenceRule();
-		if (!TextUtils.isEmpty(rrule)) {
-			return DateHelper.getNoteRecurrentReminderText(reminder, rrule);
-		} else {
-			return DateHelper.getNoteReminderText(reminder);
-		}
 	}
 
 	/**
@@ -2155,14 +1999,6 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			});
 			v.startAnimation(mAnimation);
 		}
-	}
-
-	/**
-	 * Adding shortcut on Home screen
-	 */
-	private void addShortcut() {
-		ShortcutHelper.addShortcut(OmniNotes.getAppContext(), noteTmp);
-		mainActivity.showMessage(R.string.shortcut_added, ONStyle.INFO);
 	}
 
 	TextLinkClickListener textLinkClickListener = new TextLinkClickListener() {
