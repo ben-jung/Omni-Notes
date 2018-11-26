@@ -1319,24 +1319,28 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 					Printer.PARAM_DEFAULT,
 					Printer.COMPRESS_AUTO);
 			mPrinter.addFeedLine(1);
-			mPrinter.addText("Criminal Evidence Management System\n");
+			mPrinter.addText("* Criminal Evidence Management System *\n");
 			mPrinter.addFeedLine(1);
-			mPrinter.addText("-----------------------------------\n");
+			mPrinter.addText("------------------------------------------\n");
 			mPrinter.addFeedLine(1);
 
 			mPrinter.addTextSize(2, 2);
-			String title = noteTmp.getCategory().toString() + "\n"
-					+ ((EditText) titleWrapperView.findViewById(R.id.detail_title)).getText().toString() + "\n";
+			String title = "Case. " + noteTmp.getCategory().toString() + "\n";
 			mPrinter.addText(title);
 			mPrinter.addTextSize(1, 1);
 			mPrinter.addFeedLine(1);
-			mPrinter.addText("-----------------------------------\n");
+			mPrinter.addTextSize(2, 2);
+			title = "Evi. " + ((EditText) titleWrapperView.findViewById(R.id.detail_title)).getText().toString() + "\n";
+			mPrinter.addText(title);
+			mPrinter.addTextSize(1, 1);
+			mPrinter.addFeedLine(1);
+			mPrinter.addText("------------------------------------------\n");
 			mPrinter.addFeedLine(1);
 			mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-			mPrinter.addText(content.getText().toString());
+			mPrinter.addText(content.getText().toString()+"\n");
 			mPrinter.addFeedLine(1);
 			mPrinter.addTextAlign(Printer.ALIGN_CENTER);
-			mPrinter.addText("-----------------------------------\n");
+			mPrinter.addText("------------------------------------------\n");
 			mPrinter.addFeedLine(1);
 			View capture = mGridView;
 			capture.setDrawingCacheEnabled(true);
@@ -1344,6 +1348,7 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			capture.buildDrawingCache();
 			if(capture.getDrawingCache() != null) {
 				Bitmap snapshot = Bitmap.createBitmap(capture.getDrawingCache());
+				snapshot = Bitmap.createScaledBitmap(snapshot, 384, snapshot.getHeight() * 384 / snapshot.getWidth(), true);
 				capture.setDrawingCacheEnabled(false);
 				capture.destroyDrawingCache();
 
@@ -1351,18 +1356,19 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 						snapshot.getWidth(),
 						snapshot.getHeight(),
 						Printer.COLOR_1,
-						Printer.MODE_MONO,
-						Printer.HALFTONE_DITHER,
+						Printer.MODE_MONO_HIGH_DENSITY,
 						Printer.PARAM_DEFAULT,
-						Printer.COMPRESS_NONE);
+						Printer.PARAM_DEFAULT,
+						Printer.PARAM_DEFAULT);
 			}
 
 			method = "addFeedLine";
 			mPrinter.addFeedLine(1);
-			mPrinter.addText("-----------------------------------\n");
+			mPrinter.addText("------------------------------------------\n");
 			// Whatever you need to encode in the QR code
 			MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
 			try {
+				// TODO: QR code = URL Link
 				BitMatrix bitMatrix = multiFormatWriter.encode(title, BarcodeFormat.QR_CODE,200,200);
 				BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
 				Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
