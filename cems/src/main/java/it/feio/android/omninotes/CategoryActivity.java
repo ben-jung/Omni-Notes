@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -38,6 +39,8 @@ import com.afollestad.materialdialogs.color.ColorChooserDialog;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -46,16 +49,26 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import it.feio.android.omninotes.async.bus.CategoriesUpdatedEvent;
-import it.feio.android.omninotes.async.bus.NavigationUpdatedEvent;
 import it.feio.android.omninotes.db.DbHelper;
 import it.feio.android.omninotes.models.Category;
+import it.feio.android.omninotes.network.CemsApi;
+import it.feio.android.omninotes.network.CrimeCase;
 import it.feio.android.omninotes.utils.Constants;
 import it.feio.android.simplegallery.util.BitmapUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static java.lang.Integer.parseInt;
+import static org.acra.ACRA.LOG_TAG;
 
 
 public class CategoryActivity extends AppCompatActivity implements ColorChooserDialog.ColorCallback{
+
+    private static final String API_BASE_URL = "http://192.168.0.9:8000/catalog/";
+    private CemsApi cemsApi;
 
     @BindView(R.id.category_title) EditText title;
     @BindView(R.id.category_description) EditText description;
@@ -65,8 +78,6 @@ public class CategoryActivity extends AppCompatActivity implements ColorChooserD
 
     Category category;
     private int selectedColor;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,8 +95,20 @@ public class CategoryActivity extends AppCompatActivity implements ColorChooserD
         }
         selectedColor = parseInt(category.getColor());
         populateViews();
+
+        buildNetworkService();
     }
 
+    public void buildNetworkService(){
+        if (cemsApi == null){
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(API_BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            cemsApi = retrofit.create(CemsApi.class);
+        }
+    }
 
     private int getRandomPaletteColor() {
         int[] paletteArray = getResources().getIntArray(R.array.material_colors);
@@ -163,6 +186,23 @@ public class CategoryActivity extends AppCompatActivity implements ColorChooserD
             }
         }*/
 
+        CrimeCase cc = new CrimeCase();
+        cc.number = id.toString();
+        cc.summary = title.getText().toString();
+        Call<CrimeCase> call = cemsApi.post_case(cc);
+        call.enqueue(new Callback<CrimeCase>() {
+            @Override
+            public void onResponse(Call<CrimeCase> call, Response<CrimeCase> response) {
+                if( response.isSuccessful()) {}
+                else {}
+            }
+
+            @Override
+            public void onFailure(Call<CrimeCase> call, Throwable t) {
+
+            }
+        });
+
         setResult(RESULT_FIRST_USER);
 
         finish();
@@ -192,6 +232,20 @@ public class CategoryActivity extends AppCompatActivity implements ColorChooserD
 
                         EventBus.getDefault().post(new CategoriesUpdatedEvent());
                         BaseActivity.notifyAppWidgets(OmniNotes.getAppContext());
+
+                        Call<String> call = cemsApi.delete_case(category.getId().toString());
+                        call.enqueue(new Callback<String>() {
+                            @Override
+                            public void onResponse(Call<String> call, Response<String> response) {
+                                if( response.isSuccessful()) {}
+                                else {}
+                            }
+
+                            @Override
+                            public void onFailure(Call<String> call, Throwable t) {
+
+                            }
+                        });
 
                         setResult(RESULT_FIRST_USER);
                         finish();
