@@ -104,12 +104,21 @@ import it.feio.android.omninotes.models.listeners.OnGeoUtilResultListener;
 import it.feio.android.omninotes.models.listeners.OnNoteSaved;
 import it.feio.android.omninotes.models.listeners.OnReminderPickedListener;
 import it.feio.android.omninotes.models.views.ExpandableHeightGridView;
+import it.feio.android.omninotes.network.CemsApi;
+import it.feio.android.omninotes.network.CrimeCase;
+import it.feio.android.omninotes.network.Evidence;
 import it.feio.android.omninotes.printer.ShowMsg;
 import it.feio.android.omninotes.utils.*;
 import it.feio.android.omninotes.utils.Display;
 import it.feio.android.omninotes.utils.date.DateUtils;
 import it.feio.android.omninotes.utils.date.ReminderPickers;
 import it.feio.android.pixlui.links.TextLinkClickListener;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
@@ -136,6 +145,9 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 	private static final int DETAIL = 6;
 	private static final int FILES = 7;
 	private static final int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1;
+
+	private static final String API_BASE_URL = "http://192.168.0.9:8000/catalog/";
+	private CemsApi cemsApi;
 
 	@BindView(R.id.detail_root)
 	ViewGroup root;
@@ -217,6 +229,18 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mFragment = this;
+		buildNetworkService();
+	}
+
+	public void buildNetworkService(){
+		if (cemsApi == null){
+			Retrofit retrofit = new Retrofit.Builder()
+					.baseUrl(API_BASE_URL)
+					.addConverterFactory(GsonConverterFactory.create())
+					.build();
+
+			cemsApi = retrofit.create(CemsApi.class);
+		}
 	}
 
 	@Override
@@ -1027,6 +1051,9 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 				printLabel();
 				//showNoteInfo();
 				break;
+			case R.id.upload_evidence:
+				upload();
+				break;
 			default:
 				Log.w(Constants.TAG, "Invalid menu option selected");
 		}
@@ -1035,6 +1062,43 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 				item.getItemId());
 
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void upload() {
+		Evidence evi = new Evidence();
+		evi.evi_case = noteTmp.getCategory().getId();
+		evi.evi_type = "Fingerprint";
+		evi.summary = getNoteTitle() + "\n" + getNoteContent();
+		//evi.evi_time;
+		//evi.signiture;
+		//evi.record;
+		//evi.picture;
+/*
+		View capture = mGridView;
+		capture.setDrawingCacheEnabled(true);
+		capture.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+		capture.buildDrawingCache();
+		if(capture.getDrawingCache() != null) {
+			Bitmap snapshot = Bitmap.createBitmap(capture.getDrawingCache());
+			capture.setDrawingCacheEnabled(false);
+			capture.destroyDrawingCache();
+
+			evi.picture = snapshot;
+		}*/
+
+		Call<Evidence> call = cemsApi.post_evidence(evi);
+		call.enqueue(new Callback<Evidence>() {
+			@Override
+			public void onResponse(Call<Evidence> call, Response<Evidence> response) {
+				if( response.isSuccessful()) {}
+				else {}
+			}
+
+			@Override
+			public void onFailure(Call<Evidence> call, Throwable t) {
+
+			}
+		});
 	}
 
 	private void showNoteInfo() {

@@ -55,5 +55,10 @@
         android:orderInCategory="1100"
         android:title="Print Label"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/upload_evidence"
+        android:orderInCategory="1200"
+        android:title="Upload"
+        app:showAsAction="ifRoom"/>
 
 </menu>

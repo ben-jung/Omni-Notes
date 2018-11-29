@@ -253,17 +253,6 @@ public class CategoryActivity extends AppCompatActivity implements ColorChooserD
                 }).build().show();
     }
 
-
-    public void goHome() {
-        // In this case the caller activity is DetailActivity
-        if (getIntent().getBooleanExtra("noHome", false)) {
-            setResult(RESULT_OK);
-            super.finish();
-        }
-        NavUtils.navigateUpFromSameTask(this);
-    }
-
-
     public void save(Bitmap bitmap) {
         if (bitmap == null) {
             setResult(RESULT_CANCELED);

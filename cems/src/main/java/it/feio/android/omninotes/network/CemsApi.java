@@ -13,6 +13,9 @@ public interface CemsApi {
     @DELETE("api-case/cases/{number}/")
     Call<String> delete_case(@Path("number") String number);
 
+    @POST("api/evidences/")
+    Call<Evidence> post_evidence(@Body Evidence evidence);
+
     //@POST("/api/restaurants/")
     //Call<Restaurant> post_restaruant(@Body Restaurant restaruant);
 
