@@ -124,6 +124,7 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1067,12 +1068,14 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 	private void upload() {
 		Evidence evi = new Evidence();
 		evi.evi_case = noteTmp.getCategory().getId();
-		evi.evi_type = "Fingerprint";
+		evi.evi_type = getEviType();
 		evi.summary = getNoteTitle() + "\n" + getNoteContent();
-		//evi.evi_time;
+		//evi.evi_time = getEviTime();
+
+
+		//evi.picture;
 		//evi.signiture;
 		//evi.record;
-		//evi.picture;
 /*
 		View capture = mGridView;
 		capture.setDrawingCacheEnabled(true);
@@ -1084,8 +1087,8 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			capture.destroyDrawingCache();
 
 			evi.picture = snapshot;
-		}*/
-
+		}
+*/
 		Call<Evidence> call = cemsApi.post_evidence(evi);
 		call.enqueue(new Callback<Evidence>() {
 			@Override
@@ -1099,6 +1102,17 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 
 			}
 		});
+	}
+
+	private String getEviType() {
+		String content = getNoteContent();
+		String[] tags = content.split("#");
+		if (tags.length == 1) return "";
+		else {
+			String[] frontTag1 = tags[1].split("\n");
+			String[] frontTag2 = frontTag1[0].split(" ");
+			return frontTag2[0];
+		}
 	}
 
 	private void showNoteInfo() {
@@ -1662,6 +1676,8 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 		Editable editable = content.getText();
 		int position = content.getSelectionStart();
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-d'T'HH:mm:ssZ");
+
+
 		String dateStamp = dateFormat.format(new Date().getTime()) + " ";
 		if (noteTmp.isChecklist()) {
 			if (mChecklistManager.getFocusedItemView() != null) {
