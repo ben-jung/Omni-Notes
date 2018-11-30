@@ -1,10 +1,16 @@
 package it.feio.android.omninotes.network;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface CemsApi {
     @POST("api-case/cases/")
@@ -13,18 +19,12 @@ public interface CemsApi {
     @DELETE("api-case/cases/{number}/")
     Call<String> delete_case(@Path("number") String number);
 
+    @Multipart
     @POST("api/evidences/")
-    Call<Evidence> post_evidence(@Body Evidence evidence);
-
-    //@POST("/api/restaurants/")
-    //Call<Restaurant> post_restaruant(@Body Restaurant restaruant);
-
-    /*
-    @GET("/api/restaurants/")
-
-    Call<List<Restaurant>> get_restaruant();
-
-    @GET("/api/restaurants/{pk}/")
-    Call<Restaurant> get_pk_restaruant(@Path("pk") int pk);
-     */
+    Call<ResponseBody> post_evidence(@Part("evi_case") RequestBody evi_case,
+                                     @Part("evi_type") RequestBody evi_type,
+                                     @Part("summary") RequestBody summary,
+                                     @Part("evi_time") RequestBody evi_time,
+                                     @Part MultipartBody.Part picture,
+                                     @Part MultipartBody.Part signiture);
 }

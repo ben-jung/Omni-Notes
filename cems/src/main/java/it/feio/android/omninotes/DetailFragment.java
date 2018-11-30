@@ -105,14 +105,16 @@ import it.feio.android.omninotes.models.listeners.OnNoteSaved;
 import it.feio.android.omninotes.models.listeners.OnReminderPickedListener;
 import it.feio.android.omninotes.models.views.ExpandableHeightGridView;
 import it.feio.android.omninotes.network.CemsApi;
-import it.feio.android.omninotes.network.CrimeCase;
-import it.feio.android.omninotes.network.Evidence;
 import it.feio.android.omninotes.printer.ShowMsg;
 import it.feio.android.omninotes.utils.*;
 import it.feio.android.omninotes.utils.Display;
 import it.feio.android.omninotes.utils.date.DateUtils;
 import it.feio.android.omninotes.utils.date.ReminderPickers;
 import it.feio.android.pixlui.links.TextLinkClickListener;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -605,95 +607,6 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 				(onGeoUtilResultListener));
 	}
 
-	private void initViewAttachments() {
-
-		// Attachments position based on preferences
-		if (prefs.getBoolean(Constants.PREF_ATTANCHEMENTS_ON_BOTTOM, false)) {
-			attachmentsBelow.inflate();
-		} else {
-			attachmentsAbove.inflate();
-		}
-		mGridView = (ExpandableHeightGridView) root.findViewById(R.id.gridview);
-
-		// Some fields can be filled by third party application and are always shown
-		mAttachmentAdapter = new AttachmentAdapter(mainActivity, noteTmp.getAttachmentsList(), mGridView);
-
-		// Initialzation of gridview for images
-		mGridView.setAdapter(mAttachmentAdapter);
-		mGridView.autoresize();
-
-		// Click events for images in gridview (zooms image)
-		mGridView.setOnItemClickListener((parent, v, position, id) -> {
-			Attachment attachment = (Attachment) parent.getAdapter().getItem(position);
-			Uri uri = attachment.getUri();
-			Intent attachmentIntent;
-			if (Constants.MIME_TYPE_FILES.equals(attachment.getMime_type())) {
-
-				attachmentIntent = new Intent(Intent.ACTION_VIEW);
-				attachmentIntent.setDataAndType(uri, StorageHelper.getMimeType(mainActivity,
-						attachment.getUri()));
-				attachmentIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent
-						.FLAG_GRANT_WRITE_URI_PERMISSION);
-				if (IntentChecker.isAvailable(mainActivity.getApplicationContext(), attachmentIntent, null)) {
-					startActivity(attachmentIntent);
-				} else {
-					mainActivity.showMessage(R.string.feature_not_available_on_this_device, ONStyle.WARN);
-				}
-
-				// Media files will be opened in internal gallery
-			} else if (Constants.MIME_TYPE_IMAGE.equals(attachment.getMime_type())
-					|| Constants.MIME_TYPE_SKETCH.equals(attachment.getMime_type())
-					|| Constants.MIME_TYPE_VIDEO.equals(attachment.getMime_type())) {
-				// Title
-				noteTmp.setTitle(getNoteTitle());
-				noteTmp.setContent(getNoteContent());
-				String title1 = TextHelper.parseTitleAndContent(mainActivity,
-						noteTmp)[0].toString();
-				// Images
-				int clickedImage = 0;
-				ArrayList<Attachment> images = new ArrayList<>();
-				for (Attachment mAttachment : noteTmp.getAttachmentsList()) {
-					if (Constants.MIME_TYPE_IMAGE.equals(mAttachment.getMime_type())
-							|| Constants.MIME_TYPE_SKETCH.equals(mAttachment.getMime_type())
-							|| Constants.MIME_TYPE_VIDEO.equals(mAttachment.getMime_type())) {
-						images.add(mAttachment);
-						if (mAttachment.equals(attachment)) {
-							clickedImage = images.size() - 1;
-						}
-					}
-				}
-				// Intent
-				attachmentIntent = new Intent(mainActivity, GalleryActivity.class);
-				attachmentIntent.putExtra(Constants.GALLERY_TITLE, title1);
-				attachmentIntent.putParcelableArrayListExtra(Constants.GALLERY_IMAGES, images);
-				attachmentIntent.putExtra(Constants.GALLERY_CLICKED_IMAGE, clickedImage);
-				startActivity(attachmentIntent);
-
-			} else if (Constants.MIME_TYPE_AUDIO.equals(attachment.getMime_type())) {
-				playback(v, attachment.getUri());
-			}
-
-		});
-
-		mGridView.setOnItemLongClickListener((parent, v, position, id) -> {
-			// To avoid deleting audio attachment during playback
-			if (mPlayer != null) return false;
-			List<String> items = Arrays.asList(getResources().getStringArray(R.array.attachments_actions));
-			if (!Constants.MIME_TYPE_SKETCH.equals(mAttachmentAdapter.getItem(position).getMime_type())) {
-				items = items.subList(0, items.size() - 1);
-			}
-			Attachment attachment = mAttachmentAdapter.getItem(position);
-			new MaterialDialog.Builder(mainActivity)
-					.title(attachment.getName() + " (" + AttachmentsHelper.getSize(attachment) + ")")
-					.items(items.toArray(new String[items.size()]))
-					.itemsCallback((materialDialog, view, i, charSequence) ->
-							performAttachmentAction(position, i))
-					.build()
-					.show();
-			return true;
-		});
-	}
-
 	/**
 	 * Performs an action when long-click option is selected
 	 *
@@ -1065,43 +978,144 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 		return super.onOptionsItemSelected(item);
 	}
 
+	private void initViewAttachments() {
+
+		// Attachments position based on preferences
+		if (prefs.getBoolean(Constants.PREF_ATTANCHEMENTS_ON_BOTTOM, false)) {
+			attachmentsBelow.inflate();
+		} else {
+			attachmentsAbove.inflate();
+		}
+		mGridView = (ExpandableHeightGridView) root.findViewById(R.id.gridview);
+
+		// Some fields can be filled by third party application and are always shown
+		mAttachmentAdapter = new AttachmentAdapter(mainActivity, noteTmp.getAttachmentsList(), mGridView);
+
+		// Initialzation of gridview for images
+		mGridView.setAdapter(mAttachmentAdapter);
+		mGridView.autoresize();
+
+		// Click events for images in gridview (zooms image)
+		mGridView.setOnItemClickListener((parent, v, position, id) -> {
+			Attachment attachment = (Attachment) parent.getAdapter().getItem(position);
+			Uri uri = attachment.getUri();
+			Intent attachmentIntent;
+			if (Constants.MIME_TYPE_FILES.equals(attachment.getMime_type())) {
+
+				attachmentIntent = new Intent(Intent.ACTION_VIEW);
+				attachmentIntent.setDataAndType(uri, StorageHelper.getMimeType(mainActivity,
+						attachment.getUri()));
+				attachmentIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent
+						.FLAG_GRANT_WRITE_URI_PERMISSION);
+				if (IntentChecker.isAvailable(mainActivity.getApplicationContext(), attachmentIntent, null)) {
+					startActivity(attachmentIntent);
+				} else {
+					mainActivity.showMessage(R.string.feature_not_available_on_this_device, ONStyle.WARN);
+				}
+
+				// Media files will be opened in internal gallery
+			} else if (Constants.MIME_TYPE_IMAGE.equals(attachment.getMime_type())
+					|| Constants.MIME_TYPE_SKETCH.equals(attachment.getMime_type())
+					|| Constants.MIME_TYPE_VIDEO.equals(attachment.getMime_type())) {
+				// Title
+				noteTmp.setTitle(getNoteTitle());
+				noteTmp.setContent(getNoteContent());
+				String title1 = TextHelper.parseTitleAndContent(mainActivity,
+						noteTmp)[0].toString();
+				// Images
+				int clickedImage = 0;
+				ArrayList<Attachment> images = new ArrayList<>();
+				for (Attachment mAttachment : noteTmp.getAttachmentsList()) {
+					if (Constants.MIME_TYPE_IMAGE.equals(mAttachment.getMime_type())
+							|| Constants.MIME_TYPE_SKETCH.equals(mAttachment.getMime_type())
+							|| Constants.MIME_TYPE_VIDEO.equals(mAttachment.getMime_type())) {
+						images.add(mAttachment);
+						if (mAttachment.equals(attachment)) {
+							clickedImage = images.size() - 1;
+						}
+					}
+				}
+				// Intent
+				attachmentIntent = new Intent(mainActivity, GalleryActivity.class);
+				attachmentIntent.putExtra(Constants.GALLERY_TITLE, title1);
+				attachmentIntent.putParcelableArrayListExtra(Constants.GALLERY_IMAGES, images);
+				attachmentIntent.putExtra(Constants.GALLERY_CLICKED_IMAGE, clickedImage);
+				startActivity(attachmentIntent);
+
+			} else if (Constants.MIME_TYPE_AUDIO.equals(attachment.getMime_type())) {
+				playback(v, attachment.getUri());
+			}
+
+		});
+
+		mGridView.setOnItemLongClickListener((parent, v, position, id) -> {
+			// To avoid deleting audio attachment during playback
+			if (mPlayer != null) return false;
+			List<String> items = Arrays.asList(getResources().getStringArray(R.array.attachments_actions));
+			if (!Constants.MIME_TYPE_SKETCH.equals(mAttachmentAdapter.getItem(position).getMime_type())) {
+				items = items.subList(0, items.size() - 1);
+			}
+			Attachment attachment = mAttachmentAdapter.getItem(position);
+			new MaterialDialog.Builder(mainActivity)
+					.title(attachment.getName() + " (" + AttachmentsHelper.getSize(attachment) + ")")
+					.items(items.toArray(new String[items.size()]))
+					.itemsCallback((materialDialog, view, i, charSequence) ->
+							performAttachmentAction(position, i))
+					.build()
+					.show();
+			return true;
+		});
+	}
+
 	private void upload() {
-		Evidence evi = new Evidence();
-		evi.evi_case = noteTmp.getCategory().getId();
-		evi.evi_type = getEviType();
-		evi.summary = getNoteTitle() + "\n" + getNoteContent();
-		//evi.evi_time = getEviTime();
-
-
 		//evi.picture;
 		//evi.signiture;
 		//evi.record;
-/*
-		View capture = mGridView;
-		capture.setDrawingCacheEnabled(true);
-		capture.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-		capture.buildDrawingCache();
-		if(capture.getDrawingCache() != null) {
-			Bitmap snapshot = Bitmap.createBitmap(capture.getDrawingCache());
-			capture.setDrawingCacheEnabled(false);
-			capture.destroyDrawingCache();
+		MultipartBody.Part picture = null;
+		MultipartBody.Part signiture = null;
 
-			evi.picture = snapshot;
+		for (Attachment attachment : noteTmp.getAttachmentsList()) {
+			if (Constants.MIME_TYPE_IMAGE.equals(attachment.getMime_type())) {
+				//attachment.getUriPath();
+				//attachment.getUri();
+				String fname = attachment.getUri().toString().split("///")[1];
+				File f = new File(fname);
+				RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), f);
+				picture = MultipartBody.Part.createFormData("picture", f.getName(), reqFile);
+			} else if (Constants.MIME_TYPE_SKETCH.equals(attachment.getMime_type())) {
+				String fname = attachment.getUri().toString().split("///")[1];
+				File f = new File(fname);
+				RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), f);
+				signiture = MultipartBody.Part.createFormData("signiture", f.getName(), reqFile);
+			} else if (Constants.MIME_TYPE_AUDIO.equals(attachment.getMime_type())) {
+				//evi.record = new File(attachment.getUri().toString());
+			}
 		}
-*/
-		Call<Evidence> call = cemsApi.post_evidence(evi);
-		call.enqueue(new Callback<Evidence>() {
+
+		Call<ResponseBody> call = cemsApi.post_evidence(
+				RequestBody.create(MediaType.parse("text/plain"), String.valueOf(noteTmp.getCategory().getId())),
+				RequestBody.create(MediaType.parse("text/plain"), getEviType()),
+				RequestBody.create(MediaType.parse("text/plain"), getNoteTitle() + "\n" + getNoteContent()),
+				RequestBody.create(MediaType.parse("text/plain"), getEviTime()),
+				picture,
+				signiture);
+		call.enqueue(new Callback<ResponseBody>() {
 			@Override
-			public void onResponse(Call<Evidence> call, Response<Evidence> response) {
+			public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 				if( response.isSuccessful()) {}
 				else {}
 			}
 
 			@Override
-			public void onFailure(Call<Evidence> call, Throwable t) {
+			public void onFailure(Call<ResponseBody> call, Throwable t) {
 
 			}
 		});
+	}
+
+	private String getEviTime() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		return dateFormat.format(new Date().getTime());
 	}
 
 	private String getEviType() {
