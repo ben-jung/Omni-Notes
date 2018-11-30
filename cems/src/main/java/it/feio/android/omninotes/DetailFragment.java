@@ -1068,11 +1068,9 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 	}
 
 	private void upload() {
-		//evi.picture;
-		//evi.signiture;
-		//evi.record;
 		MultipartBody.Part picture = null;
 		MultipartBody.Part signiture = null;
+		MultipartBody.Part record = null;
 
 		for (Attachment attachment : noteTmp.getAttachmentsList()) {
 			if (Constants.MIME_TYPE_IMAGE.equals(attachment.getMime_type())) {
@@ -1088,7 +1086,10 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 				RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), f);
 				signiture = MultipartBody.Part.createFormData("signiture", f.getName(), reqFile);
 			} else if (Constants.MIME_TYPE_AUDIO.equals(attachment.getMime_type())) {
-				//evi.record = new File(attachment.getUri().toString());
+				String fname = attachment.getUri().toString().split("///")[1];
+				File f = new File(fname);
+				RequestBody reqFile = RequestBody.create(MediaType.parse("audio/*"), f);
+				record = MultipartBody.Part.createFormData("record", f.getName(), reqFile);
 			}
 		}
 
@@ -1098,7 +1099,8 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 				RequestBody.create(MediaType.parse("text/plain"), getNoteTitle() + "\n" + getNoteContent()),
 				RequestBody.create(MediaType.parse("text/plain"), getEviTime()),
 				picture,
-				signiture);
+				signiture,
+				record);
 		call.enqueue(new Callback<ResponseBody>() {
 			@Override
 			public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

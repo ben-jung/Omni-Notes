@@ -26,5 +26,6 @@ public interface CemsApi {
                                      @Part("summary") RequestBody summary,
                                      @Part("evi_time") RequestBody evi_time,
                                      @Part MultipartBody.Part picture,
-                                     @Part MultipartBody.Part signiture);
+                                     @Part MultipartBody.Part signiture,
+                                     @Part MultipartBody.Part record);
 }
