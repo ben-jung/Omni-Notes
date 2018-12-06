@@ -40,6 +40,7 @@ import com.afollestad.materialdialogs.color.ColorChooserDialog;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
@@ -67,7 +68,7 @@ import static org.acra.ACRA.LOG_TAG;
 
 public class CategoryActivity extends AppCompatActivity implements ColorChooserDialog.ColorCallback{
 
-    private static final String API_BASE_URL = "http://192.168.0.9:8000/catalog/";
+    private static final String API_BASE_URL = "http://192.168.1.22:8000/catalog/";
     private CemsApi cemsApi;
 
     @BindView(R.id.category_title) EditText title;
@@ -78,6 +79,7 @@ public class CategoryActivity extends AppCompatActivity implements ColorChooserD
 
     Category category;
     private int selectedColor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

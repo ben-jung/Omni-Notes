@@ -149,7 +149,7 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 	private static final int FILES = 7;
 	private static final int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1;
 
-	private static final String API_BASE_URL = "http://192.168.0.9:8000/catalog/";
+	private static final String API_BASE_URL = "http://192.168.1.22:8000/catalog/";
 	private CemsApi cemsApi;
 
 	@BindView(R.id.detail_root)
@@ -1463,7 +1463,7 @@ public class DetailFragment extends BaseFragment implements OnTouchListener, Rec
 			MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
 			try {
 				// TODO: QR code = URL Link
-				BitMatrix bitMatrix = multiFormatWriter.encode(title, BarcodeFormat.QR_CODE,200,200);
+				BitMatrix bitMatrix = multiFormatWriter.encode(API_BASE_URL+"case/"+noteTmp.getCategory().getId(), BarcodeFormat.QR_CODE,200,200);
 				BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
 				Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
 				mPrinter.addImage(bitmap, 0, 0,
